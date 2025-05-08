@@ -1,277 +1,402 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GBP-PRO-AUDIT - Kostenloser Google Business Profil Check</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>GBP-PRO-AUDIT <span class="free-badge">KOSTENLOS</span></h1>
-    <p>Überprüfen Sie, wie gut Ihr Google Business Profil optimiert ist und erhalten Sie wertvolle Tipps zur Verbesserung Ihrer lokalen Online-Präsenz.</p>
-    
-    <div id="questionnaire">
-        <p>Beantworten Sie die folgenden Fragen, um zu überprüfen, wie gut Ihr Google Business Profil optimiert ist.</p>
-        
-        <!-- Frage 1 -->
-        <div class="question-container active" data-question="1">
-            <h2>Frage 1: Haben Sie ein verifiziertes Google Business Profil?</h2>
-            <div class="options">
-                <div class="option" data-value="10">Ja, mein Profil ist verifiziert</div>
-                <div class="option" data-value="5">Nein, aber ich habe einen Verifizierungsprozess gestartet</div>
-                <div class="option" data-value="0">Nein, mein Profil ist nicht verifiziert</div>
-            </div>
-        </div>
+// Globale Variablen
+let currentQuestion = 1;
+let answers = {};
+let userData = {};
 
-        <!-- Frage 2 -->
-        <div class="question-container" data-question="2">
-            <h2>Frage 2: Sind Ihre Geschäftsdaten (Name, Adresse, Telefon) vollständig und korrekt?</h2>
-            <div class="options">
-                <div class="option" data-value="10">Ja, alle Daten sind vollständig und korrekt</div>
-                <div class="option" data-value="5">Teilweise, einige Daten fehlen oder müssen aktualisiert werden</div>
-                <div class="option" data-value="0">Nein, die Daten sind unvollständig oder veraltet</div>
-            </div>
-        </div>
+// Wenn die Seite geladen ist
+document.addEventListener('DOMContentLoaded', function() {
+    // UI-Elemente
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const progressText = document.getElementById('progress');
+    const questionnaire = document.getElementById('questionnaire');
+    const contactFormContainer = document.getElementById('contactFormContainer');
+    const contactForm = document.getElementById('contactForm');
+    const resultContainer = document.getElementById('resultContainer');
+    const packagesContainer = document.getElementById('packagesContainer');
+    const viewPackagesBtn = document.getElementById('viewPackagesBtn');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    const percentageDisplay = document.getElementById('percentage');
+    const resultText = document.getElementById('resultText');
+    const recommendationList = document.getElementById('recommendationList');
+    const restartBtn = document.getElementById('restartBtn');
+    const canvas = document.getElementById('progressCircle');
+    const ctx = canvas.getContext('2d');
 
-        <!-- Frage 3 -->
-        <div class="question-container" data-question="3">
-            <h2>Frage 3: Haben Sie Ihre Öffnungszeiten eingetragen und aktualisiert?</h2>
-            <div class="options">
-                <div class="option" data-value="10">Ja, inklusive Sonderöffnungszeiten und Feiertagen</div>
-                <div class="option" data-value="5">Ja, aber ohne Sonderöffnungszeiten</div>
-                <div class="option" data-value="0">Nein, Öffnungszeiten fehlen oder sind veraltet</div>
-            </div>
-        </div>
+    // Canvas initialisieren
+    canvas.width = 200;
+    canvas.height = 200;
 
-        <!-- Frage 4 -->
-        <div class="question-container" data-question="4">
-            <h2>Frage 4: Haben Sie aussagekräftige Fotos in Ihrem Profil hochgeladen?</h2>
-            <div class="options">
-                <div class="option" data-value="10">Ja, viele hochwertige Fotos verschiedener Kategorien</div>
-                <div class="option" data-value="5">Ja, einige Fotos sind vorhanden</div>
-                <div class="option" data-value="0">Nein, keine oder sehr wenige Fotos</div>
-            </div>
-        </div>
-
-        <!-- Frage 5 -->
-        <div class="question-container" data-question="5">
-            <h2>Frage 5: Haben Sie regelmäßig Google Posts veröffentlicht?</h2>
-            <div class="options">
-                <div class="option" data-value="10">Ja, ich poste wöchentlich oder öfter</div>
-                <div class="option" data-value="5">Gelegentlich, aber nicht regelmäßig</div>
-                <div class="option" data-value="0">Nein, ich nutze Google Posts nicht</div>
-            </div>
-        </div>
-
-        <!-- Frage 6 -->
-        <div class="question-container" data-question="6">
-            <h2>Frage 6: Hat Ihr Google Business Profil Bewertungen und Rezensionen?</h2>
-            <div class="options">
-                <div class="option" data-value="10">Ja, viele positive Bewertungen (4-5 Sterne)</div>
-                <div class="option" data-value="5">Ja, einige Bewertungen mit unterschiedlicher Bewertung</div>
-                <div class="option" data-value="0">Keine oder nur sehr wenige Bewertungen</div>
-            </div>
-        </div>
-
-        <!-- Frage 7 -->
-        <div class="question-container" data-question="7">
-            <h2>Frage 7: Haben Sie auf alle Bewertungen geantwortet?</h2>
-            <div class="options">
-                <div class="option" data-value="10">Ja, ich antworte auf alle Bewertungen</div>
-                <div class="option" data-value="5">Teilweise, ich antworte nur auf negative Bewertungen</div>
-                <div class="option" data-value="0">Nein, ich antworte nicht auf Bewertungen</div>
-            </div>
-        </div>
-
-        <!-- Frage 8 -->
-        <div class="question-container" data-question="8">
-            <h2>Frage 8: Haben Sie relevante Kategorien für Ihr Geschäft ausgewählt?</h2>
-            <div class="options">
-                <div class="option" data-value="10">Ja, Hauptkategorie und mehrere Unterkategorien</div>
-                <div class="option" data-value="5">Nur die Hauptkategorie ist ausgewählt</div>
-                <div class="option" data-value="0">Nein, keine oder unpassende Kategorien</div>
-            </div>
-        </div>
-
-        <!-- Frage 9 -->
-        <div class="question-container" data-question="9">
-            <h2>Frage 9: Haben Sie Attribute und zusätzliche Funktionen aktiviert?</h2>
-            <div class="options">
-                <div class="option" data-value="10">Ja, alle relevanten Attribute und Funktionen</div>
-                <div class="option" data-value="5">Teilweise, einige Attribute wurden ausgewählt</div>
-                <div class="option" data-value="0">Nein, keine speziellen Attribute aktiviert</div>
-            </div>
-        </div>
-
-        <!-- Frage 10 -->
-        <div class="question-container" data-question="10">
-            <h2>Frage 10: Haben Sie regelmäßig Ihre GBP-Statistiken überprüft?</h2>
-            <div class="options">
-                <div class="option" data-value="10">Ja, ich analysiere die Daten monatlich</div>
-                <div class="option" data-value="5">Gelegentlich, aber nicht regelmäßig</div>
-                <div class="option" data-value="0">Nein, ich schaue mir die Statistiken nicht an</div>
-            </div>
-        </div>
-
-        <div class="navigation">
-            <button id="prevBtn" disabled>Zurück</button>
-            <button id="nextBtn">Weiter</button>
-            <span id="progress">Frage 1 von 10</span>
-        </div>
-    </div>
-    
-    <!-- Kontaktformular NACH dem Test aber VOR der Auswertung -->
-    <div id="contactFormContainer" class="container" style="display: none;">
-        <div class="contact-form">
-            <h3>Bitte geben Sie Ihre Kontaktdaten ein, um Ihre kostenlose Auswertung zu erhalten</h3>
-            <form id="contactForm">
-                <div class="form-group">
-                    <label for="company">Unternehmensname*</label>
-                    <input type="text" id="company" name="company" required>
-                </div>
-                <div class="form-group">
-                    <label for="firstname">Vorname*</label>
-                    <input type="text" id="firstname" name="firstname" required>
-                </div>
-                <div class="form-group">
-                    <label for="lastname">Nachname*</label>
-                    <input type="text" id="lastname" name="lastname" required>
-                </div>
-                <div class="form-group">
-                    <label for="website">Webseite</label>
-                    <input type="url" id="website" name="website">
-                </div>
-                <div class="form-group">
-                    <label for="phone">Telefon*</label>
-                    <input type="tel" id="phone" name="phone" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">E-Mail*</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                
-                <!-- Newsletter Abo -->
-                <div class="newsletter-box">
-                    <div class="form-group">
-                        <input type="checkbox" id="newsletter" name="newsletter" checked>
-                        <label for="newsletter">Ja, ich möchte den kostenlosen Newsletter mit wertvollen Tipps zu Google Business Profil und lokalem Online-Marketing erhalten.</label>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <input type="checkbox" id="privacy" name="privacy" required>
-                    <label for="privacy">Ich habe die Datenschutzerklärung gelesen und akzeptiere sie*</label>
-                </div>
-                <button type="submit" class="form-submit">Auswertung anzeigen</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="resultContainer" class="result-container">
-        <h2>Ihr Ergebnis</h2>
-        <div class="circle-container">
-            <canvas id="progressCircle" class="progress-circle"></canvas>
-            <div id="percentage" class="percentage">0%</div>
-        </div>
-        <p id="resultText">Basierend auf Ihren Antworten ist Ihr Google Business Profil zu 0% optimiert.</p>
-        
-        <div class="recommendations">
-            <h3>Empfehlungen zur Verbesserung:</h3>
-            <ul id="recommendationList">
-                <!-- Empfehlungen werden hier dynamisch eingefügt -->
-            </ul>
-        </div>
-        
-        <button id="viewPackagesBtn">Pakete anzeigen</button>
-        <button id="downloadPdfBtn">Auswertung als PDF herunterladen</button>
-        <button id="restartBtn">Test neu starten</button>
-    </div>
-
-    <!-- Pakete Section -->
-    <div id="packagesContainer" class="packages-container">
-        <h2>Unsere GBP-PRO-AUDIT Pakete</h2>
-        <p>Basierend auf Ihrem Ergebnis empfehlen wir Ihnen folgende Pakete, um Ihr Google Business Profil zu optimieren:</p>
-        
-        <div class="package-grid">
-            <!-- Basic Paket -->
-            <div class="package" data-package="basic">
-                <div class="package-header">
-                    <div class="package-name">Basic</div>
-                    <div class="package-price">
-                        <div class="price-regular">Regulärer Preis: 499 €</div>
-                        <div class="price-action">Aktionspreis: 198,99 €</div>
-                        <div class="price-save">Sie sparen: 300,01 € (60%)</div>
-                    </div>
-                    <div class="valid-until">Angebot gültig bis zum 15.05.2025!</div>
-                    <div class="tax-note">Alle Preise netto zzgl. gesetzlicher MwSt.</div>
-                </div>
-                <ul class="package-features">
-                    <li>Vollständiger GBP-PRO-AUDIT</li>
-                    <li>Optimierung der Grunddaten</li>
-                    <li>Kategorie-Optimierung</li>
-                    <li>3 professionelle Fotos</li>
-                    <li>Einrichtung von Google Posts (2x)</li>
-                    <li>30 Min. Online-Beratung</li>
-                </ul>
-                <button class="package-button">Jetzt buchen</button>
-            </div>
+    // Option-Auswahl
+    document.querySelectorAll('.option').forEach(option => {
+        option.addEventListener('click', function() {
+            // Alle Optionen dieser Frage deselektieren
+            const parentContainer = this.closest('.question-container');
+            parentContainer.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
             
-            <!-- Pro Paket -->
-            <div class="package" data-package="pro">
-                <div class="package-header">
-                    <div class="package-name">Pro</div>
-                    <div class="package-price">
-                        <div class="price-action">Preis: 799 €</div>
-                    </div>
-                    <div class="tax-note">Alle Preise netto zzgl. gesetzlicher MwSt.</div>
-                </div>
-                <ul class="package-features">
-                    <li>Alle Basic-Leistungen</li>
-                    <li>Wettbewerbsanalyse</li>
-                    <li>8 professionelle Fotos</li>
-                    <li>Einrichtung von Google Posts (5x)</li>
-                    <li>Bewertungsmanagement-Strategie</li>
-                    <li>SEO-Optimierung</li>
-                    <li>60 Min. Online-Beratung</li>
-                </ul>
-                <button class="package-button">Jetzt buchen</button>
-            </div>
+            // Diese Option auswählen
+            this.classList.add('selected');
             
-            <!-- Premium Paket -->
-            <div class="package" data-package="premium" style="position: relative;">
-                <div class="recommended-badge">EMPFOHLEN</div>
-                <div class="package-header">
-                    <div class="package-name">Premium</div>
-                    <div class="package-price">
-                        <div class="price-action">Preis: 999 €</div>
-                    </div>
-                    <div class="tax-note">Alle Preise netto zzgl. gesetzlicher MwSt.</div>
-                </div>
-                <ul class="package-features">
-                    <li>Alle Pro-Leistungen</li>
-                    <li>KI-gestützte Optimierung</li>
-                    <li>12 professionelle Fotos</li>
-                    <li>Monatliche Google Posts (3 Monate)</li>
-                    <li>Bewertungsgenerierung (10-15 Rezensionen)</li>
-                    <li>Lokale Backlink-Strategie</li>
-                    <li>GBP-Monitoring (3 Monate)</li>
-                    <li>120 Min. Online-Beratung</li>
-                </ul>
-                <button class="package-button">Jetzt buchen</button>
-            </div>
-        </div>
-    </div>
+            // Antwort speichern
+            const questionNumber = parentContainer.dataset.question;
+            const value = parseInt(this.dataset.value);
+            answers[questionNumber] = value;
+        });
+    });
 
-    <!-- Footer -->
-    <div class="footer">
-        <p><strong>Erstellt von PrintMedia Grafik + Druck</strong></p>
-        <p>Tel: 0511 - 978 24 748</p>
-    </div>
+    // Navigation: Weiter
+    nextBtn.addEventListener('click', function() {
+        const currentContainer = document.querySelector(`.question-container[data-question="${currentQuestion}"]`);
+        
+        // Prüfen, ob eine Option ausgewählt wurde
+        const selectedOption = currentContainer.querySelector('.option.selected');
+        if (!selectedOption) {
+            alert('Bitte wählen Sie eine Antwort aus, bevor Sie fortfahren.');
+            return;
+        }
+        
+        // Zur nächsten Frage
+        if (currentQuestion < 10) {
+            currentContainer.classList.remove('active');
+            currentQuestion++;
+            document.querySelector(`.question-container[data-question="${currentQuestion}"]`).classList.add('active');
+            progressText.textContent = `Frage ${currentQuestion} von 10`;
+            prevBtn.disabled = false;
+            
+            // Wenn letzte Frage, Text des Buttons ändern
+            if (currentQuestion === 10) {
+                nextBtn.textContent = 'Auswertung vorbereiten';
+            }
+        } else {
+            // Nach Fragebogen: Kontaktformular anzeigen
+            questionnaire.style.display = 'none';
+            contactFormContainer.style.display = 'block';
+        }
+    });
 
-    <!-- JavaScript einbinden -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="script.js"></script>
-    <script src="mailerlite.js"></script>
-</body>
-</html>
+    // Navigation: Zurück
+    prevBtn.addEventListener('click', function() {
+        if (currentQuestion > 1) {
+            document.querySelector(`.question-container[data-question="${currentQuestion}"]`).classList.remove('active');
+            currentQuestion--;
+            document.querySelector(`.question-container[data-question="${currentQuestion}"]`).classList.add('active');
+            progressText.textContent = `Frage ${currentQuestion} von 10`;
+            
+            nextBtn.textContent = 'Weiter';
+            
+            if (currentQuestion === 1) {
+                prevBtn.disabled = true;
+            }
+        }
+    });
 
+    // Kontaktformular absenden
+    contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Benutzerdaten sammeln
+        userData = {
+            company: document.getElementById('company').value,
+            firstname: document.getElementById('firstname').value,
+            lastname: document.getElementById('lastname').value,
+            website: document.getElementById('website').value || 'Nicht angegeben',
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value,
+            newsletter: document.getElementById('newsletter').checked
+        };
+        
+        // MailerLite API-Integration für Newsletter-Anmeldungen
+        if (userData.newsletter) {
+            sendToMailerLite(userData);
+        }
+        
+        // Ergebnis anzeigen
+        showResult();
+    });
+    
+    // Pakete anzeigen
+    viewPackagesBtn.addEventListener('click', function() {
+        resultContainer.style.display = 'none';
+        packagesContainer.style.display = 'block';
+        
+        // Empfohlenes Paket basierend auf dem Score wählen
+        const percentage = calculatePercentage();
+        let recommendedPackage;
+        
+        if (percentage < 40) {
+            recommendedPackage = 'premium';
+        } else if (percentage < 70) {
+            recommendedPackage = 'pro';
+        } else {
+            recommendedPackage = 'basic';
+        }
+        
+        // Badge entfernen und neu setzen
+        document.querySelectorAll('.recommended-badge').forEach(badge => {
+            badge.remove();
+        });
+        
+        const packageElement = document.querySelector(`.package[data-package="${recommendedPackage}"]`);
+        if (packageElement && !packageElement.querySelector('.recommended-badge')) {
+            const badge = document.createElement('div');
+            badge.className = 'recommended-badge';
+            badge.textContent = 'EMPFOHLEN';
+            packageElement.style.position = 'relative';
+            packageElement.appendChild(badge);
+        }
+        
+        // Zu den Paketen scrollen
+        packagesContainer.scrollIntoView({ behavior: 'smooth' });
+    });
+    
+    // PDF-Download
+    downloadPdfBtn.addEventListener('click', function() {
+        generatePDF();
+    });
+
+    // Paket-Auswahl und Buchung
+    document.querySelectorAll('.package').forEach(pkg => {
+        const bookButton = pkg.querySelector('.package-button');
+        bookButton.addEventListener('click', function() {
+            const packageName = pkg.dataset.package;
+            sendPackageRequest(packageName);
+        });
+    });
+
+    // Neustart
+    restartBtn.addEventListener('click', function() {
+        location.reload();
+    });
+
+    // Ergebnis berechnen und anzeigen
+    function showResult() {
+        contactFormContainer.style.display = 'none';
+        resultContainer.style.display = 'block';
+        packagesContainer.style.display = 'none';
+        
+        // Prozentsatz berechnen
+        const percentage = calculatePercentage();
+        
+        // Ergebnis anzeigen
+        percentageDisplay.textContent = `${percentage}%`;
+        resultText.textContent = `Basierend auf Ihren Antworten ist Ihr Google Business Profil zu ${percentage}% optimiert.`;
+        
+        // Empfehlungen generieren
+        generateRecommendations();
+        
+        // Prozentkreis zeichnen
+        drawProgressCircle(percentage);
+        
+        // Zu den Ergebnissen scrollen
+        resultContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Prozentsatz berechnen
+    function calculatePercentage() {
+        let totalPoints = 0;
+        let countedAnswers = 0;
+        
+        for (let i = 1; i <= 10; i++) {
+            if (answers[i] !== undefined) {
+                totalPoints += answers[i];
+                countedAnswers++;
+            }
+        }
+        
+        return Math.round((totalPoints / (countedAnswers * 10)) * 100);
+    }
+
+    // Prozentkreis zeichnen
+    function drawProgressCircle(percentage) {
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = 80;
+        const startAngle = -0.5 * Math.PI;
+        const endAngle = startAngle + (2 * Math.PI * percentage / 100);
+        
+        // Kreis löschen
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Hintergrund (grauer Kreis)
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.lineWidth = 15;
+        ctx.strokeStyle = '#f0f0f0';
+        ctx.stroke();
+        
+        // Prozent-Kreis mit Farbverlauf basierend auf Prozentsatz
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.lineWidth = 15;
+        
+        // Farbe basierend auf Prozentsatz
+        let color;
+        if (percentage < 40) {
+            color = '#FF4D4D'; // Rot
+        } else if (percentage < 70) {
+            color = '#FFA500'; // Orange
+        } else {
+            color = '#4CAF50'; // Grün
+        }
+        
+        ctx.strokeStyle = color;
+        ctx.stroke();
+        
+        // Textfarbe anpassen
+        percentageDisplay.style.color = color;
+    }
+
+    // Empfehlungen generieren
+    function generateRecommendations() {
+        recommendationList.innerHTML = '';
+        
+        const recommendations = {
+            1: "Verifizieren Sie Ihr Google Business Profil, um die Glaubwürdigkeit zu erhöhen.",
+            2: "Stellen Sie sicher, dass Ihre Geschäftsdaten vollständig und aktuell sind.",
+            3: "Tragen Sie Ihre regulären Öffnungszeiten und Sonderöffnungszeiten ein.",
+            4: "Laden Sie hochwertige Fotos verschiedener Kategorien hoch.",
+            5: "Veröffentlichen Sie regelmäßig Google Posts für bessere Sichtbarkeit.",
+            6: "Bitten Sie zufriedene Kunden aktiv um Bewertungen für Ihr Profil.",
+            7: "Antworten Sie auf alle Bewertungen, sowohl positive als auch negative.",
+            8: "Wählen Sie neben der Hauptkategorie auch relevante Unterkategorien aus.",
+            9: "Aktivieren Sie alle relevanten Attribute für Ihr Geschäft.",
+            10: "Überprüfen Sie regelmäßig Ihre GBP-Statistiken für Optimierungen."
+        };
+        
+        // Prüfen, welche Bereiche verbessert werden können
+        const missedQuestions = [];
+        for (let i = 1; i <= 10; i++) {
+            if (answers[i] < 8) {
+                missedQuestions.push(i);
+            }
+        }
+        
+        if (missedQuestions.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = "Hervorragend! Ihr Google Business Profil ist bereits sehr gut optimiert.";
+            recommendationList.appendChild(li);
+        } else {
+            missedQuestions.forEach(q => {
+                const li = document.createElement('li');
+                li.textContent = recommendations[q];
+                recommendationList.appendChild(li);
+            });
+        }
+    }
+});
+
+// E-Mail-Versand Funktion (vereinfacht, öffnet E-Mail-Client)
+function sendPackageRequest(packageName) {
+    const emailTo = "angebot@pm-hannover.de";
+    const subject = `GBP-PRO-AUDIT: Anfrage ${packageName.toUpperCase()} Paket`;
+    const percentage = calculatePercentage();
+    
+    // E-Mail-Body erstellen
+    let body = `Sehr geehrtes PrintMedia-Team,\n\n`;
+    body += `Ich interessiere mich für Ihr ${packageName.toUpperCase()} Paket für Google Business Profile Optimierung.\n\n`;
+    body += `Mein GBP-PRO-AUDIT Ergebnis: ${percentage}%\n\n`;
+    body += `Hier sind meine Kontaktdaten:\n`;
+    body += `Unternehmen: ${userData.company}\n`;
+    body += `Name: ${userData.firstname} ${userData.lastname}\n`;
+    body += `E-Mail: ${userData.email}\n`;
+    body += `Telefon: ${userData.phone}\n`;
+    body += `Website: ${userData.website}\n\n`;
+    body += `Bitte kontaktieren Sie mich für ein individuelles Angebot.\n\n`;
+    body += `Mit freundlichen Grüßen,\n${userData.firstname} ${userData.lastname}`;
+    
+    // E-Mail-Link erstellen und öffnen
+    const mailtoLink = `mailto:${emailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoLink);
+    
+    // Hinweis anzeigen
+    alert(`Vielen Dank für Ihr Interesse am ${packageName.toUpperCase()} Paket!\nEine E-Mail-Vorlage wurde erstellt. Bitte senden Sie diese ab, um Ihre Anfrage zu übermitteln.\nWir werden uns umgehend bei Ihnen melden.`);
+}
+
+// Hilfsfunktion für E-Mails
+function calculatePercentage() {
+    let totalPoints = 0;
+    let countedAnswers = 0;
+    
+    for (let i = 1; i <= 10; i++) {
+        if (answers[i] !== undefined) {
+            totalPoints += answers[i];
+            countedAnswers++;
+        }
+    }
+    
+    return Math.round((totalPoints / (countedAnswers * 10)) * 100);
+}
+
+// PDF-Generierung mit jsPDF
+function generatePDF() {
+    // Sicherstellen, dass jsPDF geladen ist
+    if (typeof window.jspdf === 'undefined') {
+        alert('PDF-Bibliothek wird geladen. Bitte versuchen Sie es in wenigen Sekunden erneut.');
+        return;
+    }
+    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Titel
+    doc.setFontSize(22);
+    doc.setTextColor(6, 102, 204); // #0066cc
+    doc.text('GBP-PRO-AUDIT Ergebnis', 105, 20, null, null, 'center');
+    
+    // Horizontale Linie
+    doc.setDrawColor(6, 102, 204); // #0066cc
+    doc.setLineWidth(0.5);
+    doc.line(20, 25, 190, 25);
+    
+    // Unternehmensdaten
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Unternehmensdaten:', 20, 40);
+    doc.setFontSize(10);
+    doc.text(`Unternehmen: ${userData.company}`, 20, 50);
+    doc.text(`Kontaktperson: ${userData.firstname} ${userData.lastname}`, 20, 57);
+    doc.text(`E-Mail: ${userData.email}`, 20, 64);
+    doc.text(`Telefon: ${userData.phone}`, 20, 71);
+    doc.text(`Website: ${userData.website || "Nicht angegeben"}`, 20, 78);
+    doc.text(`Datum: ${new Date().toLocaleDateString()}`, 20, 85);
+    
+    // Auswertung
+    const percentage = calculatePercentage();
+    doc.setFontSize(14);
+    doc.setTextColor(6, 102, 204); // #0066cc
+    doc.text('Auswertung Ihres Google Business Profils', 20, 100);
+    
+    // Score visualisieren
+    doc.setFillColor(240, 240, 240); // #f0f0f0 Hintergrund
+    doc.roundedRect(60, 110, 90, 30, 3, 3, 'F');
+    
+    // Score-Farbe basierend auf Prozentsatz
+    let scoreColor;
+    if (percentage < 40) {
+        scoreColor = [255, 77, 77]; // Rot
+    } else if (percentage < 70) {
+        scoreColor = [255, 165, 0]; // Orange
+    } else {
+        scoreColor = [76, 175, 80]; // Grün
+    }
+    
+    // Score-Text
+    doc.setFontSize(24);
+    doc.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
+    doc.text(`${percentage}%`, 105, 130, null, null, 'center');
+    
+    // Empfehlungen
+    doc.setFontSize(14);
+    doc.setTextColor(6, 102, 204); // #0066cc
+    doc.text('Empfehlungen zur Verbesserung:', 20, 150);
+    
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Erstellt von PrintMedia Grafik + Druck | Tel: 0511 - 978 24 748', 105, 285, null, null, 'center');
+    
+    // PDF speichern
+    doc.save(`GBP_Audit_${userData.company.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
+}
