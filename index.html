@@ -139,11 +139,10 @@
         <h2>Fast geschafft!</h2>
         <p class="form-description">Um deine ausführliche GBP-Analyse und personalisierte Empfehlungen zu erhalten, benötigen wir noch einige Informationen von dir:</p>
         
-        <!-- OPTIMIERT: Formular ohne action-Attribut mit success_url-Feld -->
-        <form name="gbp-audit" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <!-- NEUE LÖSUNG: Mit action=/success und Netlify.toml Redirect -->
+        <form name="gbp-audit" method="POST" data-netlify="true" action="/success" netlify-honeypot="bot-field">
           <!-- Netlify-spezifische Felder -->
           <input type="hidden" name="form-name" value="gbp-audit" />
-          <input type="hidden" name="success_url" value="/results.html" />
           <p class="hidden">
             <label>Bot-Feld (nicht ausfüllen): <input name="bot-field" /></label>
           </p>
