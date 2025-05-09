@@ -9,3 +9,10 @@
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+
+# Diese Zeile ist wichtig für die Formularverarbeitung
+[[redirects]]
+  from = "/success"
+  to = "/results.html"
+  status = 301
+  force = true
