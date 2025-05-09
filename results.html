@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deine Ergebnisse - GBP-PRO-AUDIT</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>GBP-PRO-AUDIT</h1>
+      <p>Professionelle Analyse deines Google Business Profils</p>
+    </header>
+    
+    <main>
+      <section class="results-container">
+        <div class="results-header">
+          <h2>Deine GBP-PRO-AUDIT Ergebnisse</h2>
+          <p>Vielen Dank für deine Teilnahme. Hier ist deine detaillierte Analyse.</p>
+        </div>
+        
+        <div class="score-display">
+          <div class="score-circle">
+            <span id="score-percentage">0%</span>
+          </div>
+          <p>Basierend auf deinen Antworten ist dein Google Business Profil zu <span id="score-text">0%</span> optimiert.</p>
+        </div>
+        
+        <div class="results-details">
+          <h3>Detaillierte Auswertung</h3>
+          <div id="results-breakdown" class="results-list"></div>
+        </div>
+        
+        <div class="recommendations">
+          <h3>Personalisierte Empfehlungen</h3>
+          <div id="recommendations-list" class="recommendations-list"></div>
+        </div>
+        
+        <div class="packages">
+          <h3>Unsere Optimierungs-Pakete</h3>
+          <div class="packages-container">
+            <!-- Basic-Paket -->
+            <div class="package-card">
+              <h4 class="package-title">Basic-Paket</h4>
+              <div class="package-price">€198,99 <span class="original-price">€499</span></div>
+              <p class="package-description">Starte mit einer grundlegenden Optimierung deines Google Business Profils.</p>
+              <ul class="package-features">
+                <li>Vollständiger GBP-PRO-AUDIT</li>
+                <li>PDF-Auswertung des aktuellen Profils</li>
+                <li>PDF-Optimierungsplan mit konkreten Maßnahmen</li>
+                <li>30 Min. Telefon-Beratung</li>
+                <li>Checkliste zur Selbstoptimierung</li>
+              </ul>
+              <p class="package-validity">Gültig bis 16.05.2025</p>
+            </div>
+            
+            <!-- Pro-Paket -->
+            <div class="package-card">
+              <h4 class="package-title">Pro-Paket</h4>
+              <div class="package-price">€699</div>
+              <p class="package-description">Professionelle Unterstützung für dein Google Business Profil.</p>
+              <ul class="package-features">
+                <li>Alle Basic-Leistungen</li>
+                <li>Detaillierte Wettbewerbsanalyse (PDF)</li>
+                <li>Optimierung von 3 kritischen GBP-Faktoren</li>
+                <li>Erweiterte Handlungsempfehlungen</li>
+                <li>Priorisierungsplan für Maßnahmen</li>
+                <li>60 Min. Strategie-Beratung</li>
+              </ul>
+            </div>
+            
+            <!-- Premium-Paket -->
+            <div class="package-card">
+              <h4 class="package-title">Premium-Paket</h4>
+              <div class="package-price">€999</div>
+              <p class="package-description">Umfassende Betreuung und Optimierung deines Google Business Profils.</p>
+              <ul class="package-features">
+                <li>Alle Pro-Leistungen</li>
+                <li>Professionell-gestützte GBP-Komplettanalyse</li>
+                <li>Monatlicher Performance-Bericht (2 Monate)</li>
+                <li>Optimierung von 5 kritischen GBP-Faktoren</li>
+                <li>Bewertungsmanagement-Strategie</li>
+                <li>GBP-Monitoring (2 Monate)</li>
+                <li>90 Min. Online-Beratung (3 x 30 Min.)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="download-section">
+          <button id="download-pdf" class="btn btn-primary">PDF-Bericht herunterladen</button>
+        </div>
+      </section>
+    </main>
+    
+    <footer>
+      <p>&copy; 2025 GBP-PRO-AUDIT. Alle Rechte vorbehalten.</p>
+    </footer>
+  </div>
+  
+  <script src="results.js"></script>
+</body>
+</html>
