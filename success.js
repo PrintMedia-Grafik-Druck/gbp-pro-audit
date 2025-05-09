@@ -1,5 +1,7 @@
 // success.js
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Success page loaded');
+  
   // URL-Parameter auslesen
   const params = new URLSearchParams(window.location.search);
   
@@ -13,7 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function getFormDataFromStorage() {
     const auditData = localStorage.getItem('gbp-audit-data');
     if (auditData) {
-      return JSON.parse(auditData);
+      try {
+        return JSON.parse(auditData);
+      } catch(e) {
+        console.error('Fehler beim Parsen der gespeicherten Daten:', e);
+        return null;
+      }
     }
     return null;
   }
@@ -21,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Kombinierte Daten aus URL-Parametern und lokalem Speicher
   const auditData = getFormDataFromStorage() || {};
   const combinedData = { ...auditData, ...formData };
+  console.log('Kombinierte Daten:', combinedData);
   
   // Newsletter-Anmeldung verarbeiten, falls angehakt
   if(formData.newsletter === 'on' && formData.email) {
@@ -46,8 +54,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
+  // Timer anzeigen
+  let secondsLeft = 3;
+  const timerElement = document.getElementById('redirect-timer');
+  if (timerElement) {
+    timerElement.textContent = secondsLeft;
+    
+    const timerInterval = setInterval(() => {
+      secondsLeft--;
+      if (timerElement) {
+        timerElement.textContent = secondsLeft;
+      }
+      if (secondsLeft <= 0) {
+        clearInterval(timerInterval);
+      }
+    }, 1000);
+  }
+  
   // Zur Ergebnisseite weiterleiten mit allen relevanten Daten
   setTimeout(() => {
+    // Erstelle die URL für die Ergebnisseite
     const resultPageUrl = new URL('results.html', window.location.origin);
     
     // Alle relevanten Daten als URL-Parameter anhängen
@@ -58,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     
+    console.log('Weiterleitung zu:', resultPageUrl.toString());
     // Weiterleiten zur Ergebnisseite
     window.location.href = resultPageUrl.toString();
   }, 3000); // 3 Sekunden Verzögerung für die Weiterleitung
