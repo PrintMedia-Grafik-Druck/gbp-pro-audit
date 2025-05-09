@@ -27,8 +27,8 @@
             <h3>Frage 1: Ist dein Google Business Profil vollständig ausgefüllt?</h3>
             <p>Alle relevanten Informationen wie Adresse, Telefonnummer, Öffnungszeiten, Fotos, etc. sollten eingetragen sein.</p>
             <div class="options">
-              <button class="option-btn" data-value="yes">Ja</button>
-              <button class="option-btn" data-value="no">Nein</button>
+              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
+              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
             </div>
           </div>
           
@@ -37,8 +37,8 @@
             <h3>Frage 2: Hast du regelmäßig neue Rezensionen (mindestens 1 pro Monat)?</h3>
             <p>Aktuelle Bewertungen sind ein wichtiger Ranking-Faktor für Google.</p>
             <div class="options">
-              <button class="option-btn" data-value="yes">Ja</button>
-              <button class="option-btn" data-value="no">Nein</button>
+              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
+              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
             </div>
           </div>
           
@@ -47,8 +47,8 @@
             <h3>Frage 3: Beantwortest du alle Bewertungen zeitnah (innerhalb von 24 Stunden)?</h3>
             <p>Das Reagieren auf Bewertungen zeigt Google und potenziellen Kunden, dass du aktiv bist.</p>
             <div class="options">
-              <button class="option-btn" data-value="yes">Ja</button>
-              <button class="option-btn" data-value="no">Nein</button>
+              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
+              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
             </div>
           </div>
           
@@ -57,8 +57,8 @@
             <h3>Frage 4: Veröffentlichst du regelmäßig Google Posts (mind. 2 pro Monat)?</h3>
             <p>Regelmäßige Posts halten dein Profil aktiv und informieren potenzielle Kunden.</p>
             <div class="options">
-              <button class="option-btn" data-value="yes">Ja</button>
-              <button class="option-btn" data-value="no">Nein</button>
+              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
+              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
             </div>
           </div>
           
@@ -67,8 +67,8 @@
             <h3>Frage 5: Hast du mehr als 10 hochwertige Fotos in deinem Profil?</h3>
             <p>Bilder von deinem Geschäft, Team, Produkten oder Dienstleistungen erhöhen die Aufmerksamkeit.</p>
             <div class="options">
-              <button class="option-btn" data-value="yes">Ja</button>
-              <button class="option-btn" data-value="no">Nein</button>
+              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
+              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
             </div>
           </div>
           
@@ -77,8 +77,8 @@
             <h3>Frage 6: Hast du alle relevanten Attribute für dein Business eingestellt?</h3>
             <p>Dazu gehören Barrierefreiheit, Zahlungsmethoden, Parkmöglichkeiten, etc.</p>
             <div class="options">
-              <button class="option-btn" data-value="yes">Ja</button>
-              <button class="option-btn" data-value="no">Nein</button>
+              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
+              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
             </div>
           </div>
           
@@ -87,8 +87,8 @@
             <h3>Frage 7: Ist dein Unternehmen in den richtigen Kategorien gelistet?</h3>
             <p>Die Hauptkategorie und alle relevanten Nebenkategorien sollten ausgewählt sein.</p>
             <div class="options">
-              <button class="option-btn" data-value="yes">Ja</button>
-              <button class="option-btn" data-value="no">Nein</button>
+              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
+              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
             </div>
           </div>
           
@@ -97,8 +97,8 @@
             <h3>Frage 8: Nutzt du die Produkt- oder Dienstleistungs-Features in deinem Profil?</h3>
             <p>Diese Features helfen, deine Angebote besser zu präsentieren.</p>
             <div class="options">
-              <button class="option-btn" data-value="yes">Ja</button>
-              <button class="option-btn" data-value="no">Nein</button>
+              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
+              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
             </div>
           </div>
           
@@ -107,8 +107,8 @@
             <h3>Frage 9: Hast du eine konsistente NAP (Name, Address, Phone) auf allen Plattformen?</h3>
             <p>Deine Geschäftsinformationen sollten auf allen Plattformen identisch sein.</p>
             <div class="options">
-              <button class="option-btn" data-value="yes">Ja</button>
-              <button class="option-btn" data-value="no">Nein</button>
+              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
+              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
             </div>
           </div>
           
@@ -117,5 +117,108 @@
             <h3>Frage 10: Überwachst du regelmäßig die Insights/Statistiken deines GBP?</h3>
             <p>Die Analyse der Performance-Daten hilft dir, deine Strategie zu optimieren.</p>
             <div class="options">
-              <button class="option-btn" data-value="yes">Ja</button>
-              <button class="option-btn" data-value
+              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
+              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Fortschrittsanzeige -->
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress" id="progress-bar" style="width: 10%;"></div>
+          </div>
+          <div class="progress-text">
+            <span id="current-question">1</span> von <span id="total-questions">10</span> Fragen
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. FORMULAR-BEREICH (anfangs versteckt) -->
+      <section id="form-section" class="form-container" style="display: none;">
+        <h2>Fast geschafft!</h2>
+        <p class="form-description">Um deine ausführliche GBP-Analyse und personalisierte Empfehlungen zu erhalten, benötigen wir noch einige Informationen von dir:</p>
+        
+        <form name="gbp-audit" method="POST" data-netlify="true" action="/success.html" netlify-honeypot="bot-field">
+          <!-- Netlify-spezifische Felder -->
+          <input type="hidden" name="form-name" value="gbp-audit" />
+          <p class="hidden">
+            <label>Bot-Feld (nicht ausfüllen): <input name="bot-field" /></label>
+          </p>
+          
+          <!-- Versteckte Felder für Audit-Ergebnisse -->
+          <input type="hidden" id="audit-score" name="audit-score" value="">
+          <input type="hidden" id="audit-results" name="audit-results" value="">
+          
+          <!-- Alle Felder sind Pflichtfelder -->
+          <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" placeholder="Dein vollständiger Name" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">E-Mail:</label>
+            <input type="email" id="email" name="email" placeholder="deine@email.de" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="phone">Telefon:</label>
+            <input type="tel" id="phone" name="phone" placeholder="Deine Telefonnummer" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="company">Firma:</label>
+            <input type="text" id="company" name="company" placeholder="Deine Firma" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="website">Website:</label>
+            <input type="url" id="website" name="website" value="https://" placeholder="https://deine-website.de" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="gbp-url">Google Business Profil URL:</label>
+            <input type="url" id="gbp-url" name="gbp-url" placeholder="https://g.page/deine-firma" required>
+          </div>
+          
+          <!-- Newsletter und Datenschutz -->
+          <div class="form-check">
+            <input type="checkbox" id="newsletter" name="newsletter">
+            <label for="newsletter">Ja, ich möchte den Newsletter abonnieren und über Updates informiert werden.</label>
+          </div>
+          
+          <div class="form-check">
+            <input type="checkbox" id="privacy" name="privacy" required>
+            <label for="privacy">Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und stimme zu.</label>
+          </div>
+          
+          <!-- Absende-Button -->
+          <div class="form-submit">
+            <button type="submit" class="btn btn-primary">Ergebnisse erhalten</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 3. SCORE-BEREICH (anfangs versteckt) -->
+      <section id="score-preview-section" class="score-preview-container" style="display: none;">
+        <h2>Dein GBP-Audit Ergebnis</h2>
+        <div class="score-preview">
+          <div class="score-circle">
+            <span id="score-percentage">0%</span>
+          </div>
+          <div class="score-message">
+            <p>Dein Google Business Profil ist zu <span id="score-text">0%</span> optimiert.</p>
+            <p class="score-hint">Fülle das Formular aus, um detaillierte Empfehlungen zu erhalten.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 PrintMedia Grafik + Druck e.K.. Alle Rechte vorbehalten.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
