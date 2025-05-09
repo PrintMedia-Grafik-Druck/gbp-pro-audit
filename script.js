@@ -287,34 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// E-Mail-Versand Funktion (vereinfacht, öffnet E-Mail-Client)
-function sendPackageRequest(packageName) {
-    const emailTo = "angebot@pm-hannover.de";
-    const subject = `GBP-PRO-AUDIT: Anfrage ${packageName.toUpperCase()} Paket`;
-    const percentage = calculatePercentage();
-    
-    // E-Mail-Body erstellen
-    let body = `Sehr geehrtes PrintMedia-Team,\n\n`;
-    body += `Ich interessiere mich für Ihr ${packageName.toUpperCase()} Paket für Google Business Profile Optimierung.\n\n`;
-    body += `Mein GBP-PRO-AUDIT Ergebnis: ${percentage}%\n\n`;
-    body += `Hier sind meine Kontaktdaten:\n`;
-    body += `Unternehmen: ${userData.company}\n`;
-    body += `Name: ${userData.firstname} ${userData.lastname}\n`;
-    body += `E-Mail: ${userData.email}\n`;
-    body += `Telefon: ${userData.phone}\n`;
-    body += `Website: ${userData.website}\n\n`;
-    body += `Bitte kontaktieren Sie mich für ein individuelles Angebot.\n\n`;
-    body += `Mit freundlichen Grüßen,\n${userData.firstname} ${userData.lastname}`;
-    
-    // E-Mail-Link erstellen und öffnen
-    const mailtoLink = `mailto:${emailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoLink);
-    
-    // Hinweis anzeigen
-    alert(`Vielen Dank für Ihr Interesse am ${packageName.toUpperCase()} Paket!\nEine E-Mail-Vorlage wurde erstellt. Bitte senden Sie diese ab, um Ihre Anfrage zu übermitteln.\nWir werden uns umgehend bei Ihnen melden.`);
-}
-
-// Hilfsfunktion für E-Mails
+// Hilfsfunktion für E-Mails und PDFs
 function calculatePercentage() {
     let totalPoints = 0;
     let countedAnswers = 0;
@@ -327,76 +300,4 @@ function calculatePercentage() {
     }
     
     return Math.round((totalPoints / (countedAnswers * 10)) * 100);
-}
-
-// PDF-Generierung mit jsPDF
-function generatePDF() {
-    // Sicherstellen, dass jsPDF geladen ist
-    if (typeof window.jspdf === 'undefined') {
-        alert('PDF-Bibliothek wird geladen. Bitte versuchen Sie es in wenigen Sekunden erneut.');
-        return;
-    }
-    
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Titel
-    doc.setFontSize(22);
-    doc.setTextColor(6, 102, 204); // #0066cc
-    doc.text('GBP-PRO-AUDIT Ergebnis', 105, 20, null, null, 'center');
-    
-    // Horizontale Linie
-    doc.setDrawColor(6, 102, 204); // #0066cc
-    doc.setLineWidth(0.5);
-    doc.line(20, 25, 190, 25);
-    
-    // Unternehmensdaten
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text('Unternehmensdaten:', 20, 40);
-    doc.setFontSize(10);
-    doc.text(`Unternehmen: ${userData.company}`, 20, 50);
-    doc.text(`Kontaktperson: ${userData.firstname} ${userData.lastname}`, 20, 57);
-    doc.text(`E-Mail: ${userData.email}`, 20, 64);
-    doc.text(`Telefon: ${userData.phone}`, 20, 71);
-    doc.text(`Website: ${userData.website || "Nicht angegeben"}`, 20, 78);
-    doc.text(`Datum: ${new Date().toLocaleDateString()}`, 20, 85);
-    
-    // Auswertung
-    const percentage = calculatePercentage();
-    doc.setFontSize(14);
-    doc.setTextColor(6, 102, 204); // #0066cc
-    doc.text('Auswertung Ihres Google Business Profils', 20, 100);
-    
-    // Score visualisieren
-    doc.setFillColor(240, 240, 240); // #f0f0f0 Hintergrund
-    doc.roundedRect(60, 110, 90, 30, 3, 3, 'F');
-    
-    // Score-Farbe basierend auf Prozentsatz
-    let scoreColor;
-    if (percentage < 40) {
-        scoreColor = [255, 77, 77]; // Rot
-    } else if (percentage < 70) {
-        scoreColor = [255, 165, 0]; // Orange
-    } else {
-        scoreColor = [76, 175, 80]; // Grün
-    }
-    
-    // Score-Text
-    doc.setFontSize(24);
-    doc.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
-    doc.text(`${percentage}%`, 105, 130, null, null, 'center');
-    
-    // Empfehlungen
-    doc.setFontSize(14);
-    doc.setTextColor(6, 102, 204); // #0066cc
-    doc.text('Empfehlungen zur Verbesserung:', 20, 150);
-    
-    // Footer
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text('Erstellt von PrintMedia Grafik + Druck | Tel: 0511 - 978 24 748', 105, 285, null, null, 'center');
-    
-    // PDF speichern
-    doc.save(`GBP_Audit_${userData.company.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
 }
