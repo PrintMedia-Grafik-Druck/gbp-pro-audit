@@ -25,9 +25,9 @@ function sendToMailerLite(userData) {
     
     // Browser-CORS-Problem umgehen mit formbasierten Ansatz
     // Da direkter API-Zugriff via fetch im Browser oft durch CORS blockiert wird,
-    // verwenden wir eine E-Mail-Benachrichtigung, dass ein neuer Abonnent vorhanden ist
+    // senden wir die Daten direkt an die E-Mail-Adresse für den Support
     
-    // E-Mail mit Abonnenten-Details an dich senden
+    // E-Mail mit Abonnenten-Details per mailto öffnen
     const emailTo = "angebot@pm-hannover.de";
     const subject = "Neuer Newsletter-Abonnent von GBP-PRO-AUDIT";
     let body = `Neuer Newsletter-Abonnent:\n\n`;
@@ -38,141 +38,106 @@ function sendToMailerLite(userData) {
     body += `Website: ${userData.website || "Nicht angegeben"}\n\n`;
     body += `Bitte füge diesen Kontakt zur "Google Business Optimierung"-Gruppe in MailerLite hinzu.`;
     
-    // Wenn der Browser es unterstützt, E-Mail-Client öffnen
+    // E-Mail-Client öffnen
     const mailtoLink = `mailto:${emailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoLink);
     
-    // Für Testzwecke: Öffnen wir das Mail-Programm nur, wenn der Nutzer es erlaubt
-    if (confirm("Möchten Sie uns über den neuen Newsletter-Abonnenten informieren? Dies öffnet Ihr E-Mail-Programm.")) {
-        window.open(mailtoLink);
-    }
-    
-    // Optional: Logging
     console.log("MailerLite: Benachrichtigung über neuen Abonnenten gesendet");
 }
 
-// PDF-Generierung
+// PDF-Generierung mit jsPDF
 function generatePDF() {
+    // Sicherstellen, dass jsPDF geladen ist
     if (typeof window.jspdf === 'undefined') {
-        alert('Die PDF-Bibliothek wird geladen. Bitte versuchen Sie es in wenigen Sekunden erneut.');
+        alert('PDF-Bibliothek wird geladen. Bitte versuchen Sie es in wenigen Sekunden erneut.');
         return;
     }
     
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        // Titel
-        doc.setFontSize(22);
-        doc.setTextColor(6, 102, 204); // #0066cc
-        doc.text('GBP-PRO-AUDIT Ergebnis', 105, 20, null, null, 'center');
-        
-        // Unternehmensdaten
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        doc.text('Unternehmensdaten:', 20, 40);
-        doc.setFontSize(10);
-        doc.text(`Unternehmen: ${userData.company}`, 20, 50);
-        doc.text(`Kontaktperson: ${userData.firstname} ${userData.lastname}`, 20, 57);
-        doc.text(`E-Mail: ${userData.email}`, 20, 64);
-        doc.text(`Telefon: ${userData.phone || "Nicht angegeben"}`, 20, 71);
-        doc.text(`Website: ${userData.website || "Nicht angegeben"}`, 20, 78);
-        doc.text(`Datum: ${new Date().toLocaleDateString()}`, 20, 85);
-        
-        // Auswertung
-        const percentage = calculatePercentage();
-        doc.setFontSize(14);
-        doc.setTextColor(6, 102, 204);
-        doc.text('Auswertung Ihres Google Business Profils', 20, 100);
-        
-        // Score anzeigen
-        doc.setFillColor(240, 240, 240);
-        doc.roundedRect(60, 110, 90, 30, 3, 3, 'F');
-        
-        // Score-Farbe basierend auf Prozentsatz
-        let scoreColor;
-        if (percentage < 40) {
-            scoreColor = [255, 77, 77]; // Rot
-        } else if (percentage < 70) {
-            scoreColor = [255, 165, 0]; // Orange
-        } else {
-            scoreColor = [76, 175, 80]; // Grün
-        }
-        
-        // Score-Text
-        doc.setFontSize(24);
-        doc.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
-        doc.text(`${percentage}%`, 105, 130, null, null, 'center');
-        
-        // Empfehlungen
-        const recommendations = getRecommendations();
-        doc.setFontSize(14);
-        doc.setTextColor(6, 102, 204);
-        doc.text('Empfehlungen zur Verbesserung:', 20, 150);
-        
-        // Empfehlungsliste
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        let y = 160;
-        
-        recommendations.forEach((recommendation, index) => {
-            // Text umbrechen, damit er auf die Seite passt
-            const lines = doc.splitTextToSize(`${index + 1}. ${recommendation}`, 170);
-            doc.text(lines, 20, y);
-            y += 10 * lines.length;
-            
-            // Neue Seite, falls nötig
-            if (y > 270 && index < recommendations.length - 1) {
-                doc.addPage();
-                y = 20;
-            }
-        });
-        
-        // Footer
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text('Erstellt von PrintMedia Grafik + Druck | Tel: 0511 - 978 24 748', 105, 285, null, null, 'center');
-        
-        // PDF speichern
-        doc.save(`GBP-Audit_${userData.company.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
-        
-        console.log("PDF erfolgreich generiert");
-    } catch (error) {
-        console.error("Fehler bei der PDF-Generierung:", error);
-        alert("Bei der Erstellung des PDFs ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.");
-    }
-}
-
-// Hilfsfunktion für Empfehlungen
-function getRecommendations() {
-    const recommendations = {
-        1: "Verifizieren Sie Ihr Google Business Profil, um die Glaubwürdigkeit zu erhöhen und alle Funktionen nutzen zu können.",
-        2: "Stellen Sie sicher, dass Ihre Geschäftsdaten vollständig und aktuell sind. Korrekte Daten sind für die lokale Suche entscheidend.",
-        3: "Tragen Sie Ihre regulären Öffnungszeiten ein und vergessen Sie nicht, Sonderöffnungszeiten für Feiertage zu aktualisieren.",
-        4: "Laden Sie hochwertige Fotos in verschiedenen Kategorien hoch: Außenansicht, Innenansicht, Team, Produkte oder Dienstleistungen.",
-        5: "Veröffentlichen Sie regelmäßig Google Posts, um Kunden über Neuigkeiten, Angebote oder Events zu informieren.",
-        6: "Bitten Sie zufriedene Kunden aktiv um Bewertungen. Positive Bewertungen verbessern Ihre Sichtbarkeit und das Vertrauen potenzieller Kunden.",
-        7: "Antworten Sie auf alle Bewertungen - sowohl positive als auch negative. Dies zeigt, dass Sie sich um Kundenfeedback kümmern.",
-        8: "Wählen Sie neben Ihrer Hauptkategorie auch relevante Unterkategorien, um Ihre Auffindbarkeit für verschiedene Suchanfragen zu verbessern.",
-        9: "Aktivieren Sie alle relevanten Attribute und Funktionen, um Ihr Profil vollständig zu beschreiben.",
-        10: "Überprüfen Sie regelmäßig Ihre GBP-Statistiken, um zu verstehen, wie Kunden mit Ihrem Profil interagieren."
-    };
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
     
-    // Prüfen, welche Bereiche verbessert werden können
-    const missedQuestions = [];
-    for (let i = 1; i <= 10; i++) {
-        if (answers[i] < 8) {
-            missedQuestions.push(i);
-        }
-    }
+    // Titel
+    doc.setFontSize(22);
+    doc.setTextColor(6, 102, 204); // #0066cc
+    doc.text('GBP-PRO-AUDIT Ergebnis', 105, 20, null, null, 'center');
     
-    if (missedQuestions.length === 0) {
-        return ["Hervorragend! Ihr Google Business Profil ist bereits sehr gut optimiert. Behalten Sie Ihre Strategie bei und aktualisieren Sie regelmäßig Ihre Inhalte."];
+    // Horizontale Linie
+    doc.setDrawColor(6, 102, 204); // #0066cc
+    doc.setLineWidth(0.5);
+    doc.line(20, 25, 190, 25);
+    
+    // Unternehmensdaten
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Unternehmensdaten:', 20, 40);
+    doc.setFontSize(10);
+    doc.text(`Unternehmen: ${userData.company}`, 20, 50);
+    doc.text(`Kontaktperson: ${userData.firstname} ${userData.lastname}`, 20, 57);
+    doc.text(`E-Mail: ${userData.email}`, 20, 64);
+    doc.text(`Telefon: ${userData.phone}`, 20, 71);
+    doc.text(`Website: ${userData.website || "Nicht angegeben"}`, 20, 78);
+    doc.text(`Datum: ${new Date().toLocaleDateString()}`, 20, 85);
+    
+    // Auswertung
+    const percentage = calculatePercentage();
+    doc.setFontSize(14);
+    doc.setTextColor(6, 102, 204); // #0066cc
+    doc.text('Auswertung Ihres Google Business Profils', 20, 100);
+    
+    // Score visualisieren
+    doc.setFillColor(240, 240, 240); // #f0f0f0 Hintergrund
+    doc.roundedRect(60, 110, 90, 30, 3, 3, 'F');
+    
+    // Score-Farbe basierend auf Prozentsatz
+    let scoreColor;
+    if (percentage < 40) {
+        scoreColor = [255, 77, 77]; // Rot
+    } else if (percentage < 70) {
+        scoreColor = [255, 165, 0]; // Orange
     } else {
-        return missedQuestions.map(q => recommendations[q]);
+        scoreColor = [76, 175, 80]; // Grün
     }
+    
+    // Score-Text
+    doc.setFontSize(24);
+    doc.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
+    doc.text(`${percentage}%`, 105, 130, null, null, 'center');
+    
+    // Empfehlungen
+    doc.setFontSize(14);
+    doc.setTextColor(6, 102, 204); // #0066cc
+    doc.text('Empfehlungen zur Verbesserung:', 20, 150);
+    
+    // Empfehlungen Liste
+    const recommendationsList = document.getElementById('recommendationList');
+    const recommendations = Array.from(recommendationsList.querySelectorAll('li')).map(li => li.textContent);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    
+    let y = 160;
+    recommendations.forEach((recommendation, index) => {
+        // Seitenumbruch prüfen
+        if (y > 270) {
+            doc.addPage();
+            y = 20;
+        }
+        
+        const lines = doc.splitTextToSize(`${index + 1}. ${recommendation}`, 170);
+        doc.text(lines, 20, y);
+        y += 10 * lines.length;
+    });
+    
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Erstellt von PrintMedia Grafik + Druck | Tel: 0511 - 978 24 748', 105, 285, null, null, 'center');
+    
+    // PDF speichern
+    doc.save(`GBP_Audit_${userData.company.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
 }
 
-// E-Mail-Versand für Paketanfragen
+// E-Mail-Versand Funktion für Paketanfragen
 function sendPackageRequest(packageName) {
     const emailTo = "angebot@pm-hannover.de";
     const subject = `GBP-PRO-AUDIT: Anfrage ${packageName.toUpperCase()} Paket`;
@@ -186,8 +151,8 @@ function sendPackageRequest(packageName) {
     body += `Unternehmen: ${userData.company}\n`;
     body += `Name: ${userData.firstname} ${userData.lastname}\n`;
     body += `E-Mail: ${userData.email}\n`;
-    body += `Telefon: ${userData.phone || "Nicht angegeben"}\n`;
-    body += `Website: ${userData.website || "Nicht angegeben"}\n\n`;
+    body += `Telefon: ${userData.phone}\n`;
+    body += `Website: ${userData.website}\n\n`;
     body += `Bitte kontaktieren Sie mich für ein individuelles Angebot.\n\n`;
     body += `Mit freundlichen Grüßen,\n${userData.firstname} ${userData.lastname}`;
     
