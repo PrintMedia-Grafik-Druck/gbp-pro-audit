@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Funktion zum Abschließen des Audits und Anzeigen des Formulars und Scores
+  // Funktion zum Abschließen des Audits und Anzeigen des Formulars
   function completeAudit() {
     // Score berechnen
     const yesAnswers = answers.filter(answer => answer === 'yes').length;
@@ -43,11 +43,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Audit-Bereich ausblenden
     auditSection.style.display = 'none';
     
-    // Score-Preview anzeigen
-    document.getElementById('score-percentage').textContent = `${scorePercentage}%`;
-    document.getElementById('score-text').textContent = `${scorePercentage}%`;
-    document.querySelector('.score-circle').style.setProperty('--percentage', `${scorePercentage}%`);
-    scorePreviewSection.style.display = 'block';
+    // ÄNDERUNG: Score-Preview ausblenden, bis Formular abgesendet wird
+    scorePreviewSection.style.display = 'none';
     
     // Formular anzeigen
     formSection.style.display = 'block';
@@ -107,8 +104,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const form = document.querySelector('form[name="gbp-audit"]');
   if (form) {
     form.addEventListener('submit', function(event) {
+      // Prüfen, ob der Datenschutz akzeptiert wurde
+      const privacyCheckbox = document.getElementById('privacy');
+      if (!privacyCheckbox || !privacyCheckbox.checked) {
+        event.preventDefault();
+        alert('Bitte akzeptiere die Datenschutzerklärung, um fortzufahren.');
+        return;
+      }
+      
       // Hier könntest du zusätzliche Validierungen hinzufügen
       console.log('Formular wird abgesendet...');
+      
+      // Keine Verhinderung des Absenden hier - die Weiterleitung erfolgt regulär
     });
   }
 });
