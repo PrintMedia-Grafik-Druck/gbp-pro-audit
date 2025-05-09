@@ -10,47 +10,81 @@ document.addEventListener('DOMContentLoaded', function() {
   const formSection = document.getElementById('form-section');
   const scorePreviewSection = document.getElementById('score-preview-section');
   
-  // Alle Optionsbuttons mit Event-Listener versehen
+  // Verbesserte Button-Event-Listener-Implementierung
   document.querySelectorAll('.option-btn').forEach(button => {
-    button.addEventListener('click', function() {
-      // Antwort speichern
-      const questionIndex = parseInt(this.closest('.question').id.split('-')[1]) - 1;
-      answers[questionIndex] = this.dataset.value;
+    // Entfernen von bestehenden Event-Listenern, falls vorhanden
+    button.removeEventListener('click', handleButtonClick);
+    // Hinzufügen des Event-Listeners
+    button.addEventListener('click', handleButtonClick);
+  });
+  
+  // Funktion, die auf Klick-Events reagiert
+  function handleButtonClick(event) {
+    // Verhindere Standard-Button-Verhalten
+    event.preventDefault();
+    
+    // Hole die Question-ID aus dem übergeordneten Element
+    const questionElement = this.closest('.question');
+    if (!questionElement) return;
+    
+    const questionId = questionElement.id;
+    const questionIndex = parseInt(questionId.split('-')[1]) - 1;
+    
+    // Speichere die Antwort
+    answers[questionIndex] = this.dataset.value;
+    console.log(`Frage ${questionIndex + 1} beantwortet mit: ${this.dataset.value}`);
+    
+    // Zur nächsten Frage weitergehen oder zum Formular
+    if (currentQuestion < totalQuestions) {
+      // Aktuelle Frage ausblenden
+      document.getElementById(`question-${currentQuestion}`).style.display = 'none';
       
-      // Zur nächsten Frage weitergehen oder zur Formular-Sektion
-      if (currentQuestion < totalQuestions) {
-        // Nächste Frage anzeigen
-        document.getElementById(`question-${currentQuestion}`).style.display = 'none';
-        currentQuestion++;
-        document.getElementById(`question-${currentQuestion}`).style.display = 'block';
+      // Nächste Frage anzeigen
+      currentQuestion++;
+      const nextQuestion = document.getElementById(`question-${currentQuestion}`);
+      if (nextQuestion) {
+        nextQuestion.style.display = 'block';
         
         // Fortschrittsanzeige aktualisieren
-        document.getElementById('current-question').textContent = currentQuestion;
-        document.getElementById('progress-bar').style.width = `${(currentQuestion / totalQuestions) * 100}%`;
-      } else {
-        // Alle Fragen beantwortet - zum Formular gehen
-        completeAudit();
+        const currentQuestionElement = document.getElementById('current-question');
+        const progressBar = document.getElementById('progress-bar');
+        
+        if (currentQuestionElement) {
+          currentQuestionElement.textContent = currentQuestion;
+        }
+        
+        if (progressBar) {
+          progressBar.style.width = `${(currentQuestion / totalQuestions) * 100}%`;
+        }
       }
-    });
-  });
+    } else {
+      // Alle Fragen beantwortet - zum Formular gehen
+      completeAudit();
+    }
+  }
   
   // Funktion zum Abschließen des Audits und Anzeigen des Formulars
   function completeAudit() {
     // Score berechnen
     const yesAnswers = answers.filter(answer => answer === 'yes').length;
     const scorePercentage = Math.round((yesAnswers / totalQuestions) * 100);
+    console.log(`Audit abgeschlossen. Score: ${scorePercentage}%`);
     
     // Audit-Bereich ausblenden
-    auditSection.style.display = 'none';
+    if (auditSection) {
+      auditSection.style.display = 'none';
+    }
     
-    // ÄNDERUNG: Score-Preview ausblenden, bis Formular abgesendet wird
-    scorePreviewSection.style.display = 'none';
+    // Score-Preview ausblenden bis Formular abgesendet wird
+    if (scorePreviewSection) {
+      scorePreviewSection.style.display = 'none';
+    }
     
     // Formular anzeigen
-    formSection.style.display = 'block';
-    
-    // Zu Formular scrollen
-    formSection.scrollIntoView({ behavior: 'smooth' });
+    if (formSection) {
+      formSection.style.display = 'block';
+      formSection.scrollIntoView({ behavior: 'smooth' });
+    }
     
     // Ergebnisse für das Formular speichern
     prepareFormData(scorePercentage);
@@ -84,12 +118,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Ergebnisse in die versteckten Formularfelder eintragen
-    if (document.getElementById('audit-score')) {
-      document.getElementById('audit-score').value = scorePercentage;
+    const auditScoreElement = document.getElementById('audit-score');
+    const auditResultsElement = document.getElementById('audit-results');
+    
+    if (auditScoreElement) {
+      auditScoreElement.value = scorePercentage;
     }
     
-    if (document.getElementById('audit-results')) {
-      document.getElementById('audit-results').value = encodeURIComponent(JSON.stringify(results));
+    if (auditResultsElement) {
+      auditResultsElement.value = encodeURIComponent(JSON.stringify(results));
     }
     
     // Ergebnisse im lokalen Speicher für die spätere Verwendung speichern
@@ -112,10 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      // Hier könntest du zusätzliche Validierungen hinzufügen
       console.log('Formular wird abgesendet...');
-      
-      // Keine Verhinderung des Absenden hier - die Weiterleitung erfolgt regulär
     });
   }
 });
