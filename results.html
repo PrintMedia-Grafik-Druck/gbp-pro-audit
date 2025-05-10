@@ -168,11 +168,12 @@
         <h2>Paket-Anfrage</h2>
         <p class="form-description">Bitte vervollständige deine Anfrage für das <span id="selected-package">Basic</span>-Paket:</p>
         
+        <!-- WICHTIG: Korrigiertes Netlify-Formular mit Standard-Übermittlung -->
         <form id="package-request-form" name="package-request" method="POST" data-netlify="true" netlify-honeypot="bot-field">
           <!-- Netlify-spezifische Felder -->
           <input type="hidden" name="form-name" value="package-request" />
           <p class="hidden">
-            <label>Bot-Feld (nicht ausfüllen): <input name="bot-field" /></label>
+            <label>Nicht ausfüllen, wenn du ein Mensch bist: <input name="bot-field" /></label>
           </p>
           
           <input type="hidden" id="package-type" name="package-type" value="Basic" />
@@ -203,7 +204,7 @@
           </div>
           
           <div class="buttons-row">
-            <button type="button" class="btn btn-primary" onclick="submitPackageRequest()">Anfrage senden</button>
+            <button id="submit-request" type="submit" class="btn btn-primary">Anfrage senden</button>
             <button type="button" class="btn btn-secondary" onclick="showResults()">Zurück zu den Ergebnissen</button>
           </div>
         </form>
@@ -258,47 +259,34 @@
           showDefaultResults();
         }
       }, 1500);
-    });
-    
-    // WICHTIGER FIX: Eigene Formular-Absende-Funktion, die nicht die Standardaktion des Formulars verwendet
-    function submitPackageRequest() {
+      
+      // Formular-Event-Listener für die Paketanfrage
       const form = document.getElementById('package-request-form');
-      
-      // Prüfen, ob der Datenschutz akzeptiert wurde
-      const privacyCheckbox = document.getElementById('request-privacy');
-      if (!privacyCheckbox || !privacyCheckbox.checked) {
-        alert('Bitte akzeptiere die Datenschutzerklärung, um fortzufahren.');
-        return;
+      if (form) {
+        form.addEventListener('submit', function(event) {
+          // Die Standardübermittlung erfolgt, aber wir müssen sicherstellen,
+          // dass das Bestätigungsmodal angezeigt wird
+          
+          // Prüfen, ob der Datenschutz akzeptiert wurde
+          const privacyCheckbox = document.getElementById('request-privacy');
+          if (!privacyCheckbox || !privacyCheckbox.checked) {
+            event.preventDefault(); // Übermittlung verhindern
+            alert('Bitte akzeptiere die Datenschutzerklärung, um fortzufahren.');
+            return false;
+          }
+          
+          // Paketnamen für die Bestätigung setzen
+          document.getElementById('confirmed-package').textContent = 
+            document.getElementById('selected-package').textContent;
+            
+          // Wir erlauben die Standardübermittlung, zeigen aber auch das Modal an
+          // Dies stellt sicher, dass das Formular an Netlify gesendet wird
+          setTimeout(function() {
+            showConfirmationModal();
+          }, 300);
+        });
       }
-      
-      // Formular-Validierung
-      if (!form.checkValidity()) {
-        // Manuelle Anzeige der Validierungsmeldungen
-        form.reportValidity();
-        return;
-      }
-      
-      // Paketnamen für die Bestätigung setzen
-      document.getElementById('confirmed-package').textContent = 
-        document.getElementById('selected-package').textContent;
-      
-      // Formular per AJAX absenden ohne Seiten-Reload
-      const formData = new FormData(form);
-      
-      fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(formData).toString()
-      })
-      .then(() => {
-        console.log('Formular erfolgreich gesendet');
-        showConfirmationModal(); // Modal-Dialog anzeigen
-      })
-      .catch((error) => {
-        console.error('Fehler beim Absenden des Formulars:', error);
-        showConfirmationModal(); // Auch im Fehlerfall das Modal anzeigen
-      });
-    }
+    });
     
     // Funktion zum Anzeigen des Bestätigungsmodals
     function showConfirmationModal() {
@@ -496,85 +484,4 @@
       }
       
       let html = '';
-      results.forEach((result, index) => {
-        html += `
-          <div class="result-item ${result.passed ? 'passed' : 'failed'}">
-            <h4>${index + 1}. ${result.question}</h4>
-            <p><strong>${result.passed ? 'Ja ✓' : 'Nein ✗'}</strong>: ${result.explanation}</p>
-          </div>
-        `;
-      });
-      
-      resultsElement.innerHTML = html;
-    }
-    
-    // Funktion zum Generieren von Empfehlungen basierend auf dem Score
-    function generateRecommendations(score) {
-      const recommendationsElement = document.getElementById('recommendations-list');
-      if (!recommendationsElement) return;
-      
-      let recommendations = [];
-      
-      // Empfehlungen basierend auf dem Score-Bereich
-      if (score < 30) {
-        recommendations = [
-          "Dein Google Business Profil benötigt dringend Optimierung. Wir empfehlen unser Premium-Paket für eine vollständige Überarbeitung.",
-          "Beginne mit dem Hochladen hochwertiger Fotos und der Vervollständigung aller Grundinformationen.",
-          "Starte mit dem Sammeln von Bewertungen deiner zufriedenen Kunden.",
-          "Implementiere eine regelmäßige Strategie für Google Posts und Aktualisierungen."
-        ];
-      } else if (score < 70) {
-        recommendations = [
-          "Dein GBP hat Potential! Mit unserem Pro-Paket kannst du deine Sichtbarkeit deutlich erhöhen.",
-          "Achte auf regelmäßige Posts und Updates in deinem Profil.",
-          "Reagiere schneller auf Bewertungen, um die Kundenbindung zu stärken.",
-          "Analysiere deine GBP-Insights regelmäßig, um deine Strategie zu optimieren."
-        ];
-      } else {
-        recommendations = [
-          "Dein GBP ist bereits gut optimiert! Mit unserem Basic-Paket kannst du den Vorsprung weiter ausbauen.",
-          "Fokussiere dich auf fortgeschrittene Strategien wie lokale Veranstaltungen und spezielle Angebote.",
-          "Nutze die Google Business Messenger-Funktion für besseren Kundenservice.",
-          "Halte dein Profil mit regelmäßigen Updates und neuen Fotos aktuell."
-        ];
-      }
-      
-      // Empfehlungen anzeigen
-      let html = '';
-      recommendations.forEach((recommendation, index) => {
-        html += `
-          <div class="recommendation-item">
-            <p><strong>${index + 1}.</strong> ${recommendation}</p>
-          </div>
-        `;
-      });
-      
-      recommendationsElement.innerHTML = html;
-    }
-    
-    // Funktion zum Anzeigen des Anfrage-Formulars
-    function requestPackage(packageType) {
-      // Pakettyp im Formular speichern
-      document.getElementById('package-type').value = packageType;
-      document.getElementById('selected-package').textContent = packageType;
-      document.getElementById('confirmed-package').textContent = packageType;
-      
-      // Ergebnisbereich ausblenden
-      document.getElementById('results-section').style.display = 'none';
-      
-      // Anfrage-Formular anzeigen
-      document.getElementById('request-form-section').style.display = 'block';
-      
-      // Zum Formular scrollen
-      document.getElementById('request-form-section').scrollIntoView({ behavior: 'smooth' });
-    }
-    
-    // Funktion zum Zurückkehren zu den Ergebnissen
-    function showResults() {
-      document.getElementById('request-form-section').style.display = 'none';
-      document.getElementById('results-section').style.display = 'block';
-      document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
-    }
-  </script>
-</body>
-</html>
+      results.forEach((result, index) =>
