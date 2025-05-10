@@ -749,3 +749,83 @@ footer {
   color: var(--text-secondary);
   margin-top: 0.5rem;
 }
+
+/* Success-Seite Styling */
+.success-message {
+  text-align: center;
+  padding: 3rem;
+  max-width: 800px;
+  margin: 2rem auto;
+  background-color: var(--background);
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+.success-message:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background-color: var(--accent-color);
+}
+
+.success-icon {
+  margin: 2rem auto;
+}
+
+.success-text {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+.success-info {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: var(--text-secondary);
+}
+
+.success-details {
+  text-align: left;
+  margin: 2.5rem 0;
+  padding: 2rem;
+  background-color: var(--accent-light);
+}
+
+.success-details h3 {
+  font-family: var(--font-main);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+}
+
+.success-details ol {
+  padding-left: 1.5rem;
+}
+
+.success-details li {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.success-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .success-actions {
+    flex-direction: column;
+  }
+  
+  .success-actions .btn {
+    width: 100%;
+  }
+}
