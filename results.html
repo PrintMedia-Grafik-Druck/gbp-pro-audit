@@ -7,13 +7,13 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <div class="container">
     <header>
       <h1>GBP-PRO-AUDIT</h1>
       <p>Professionelle Analyse deines Google Business Profils</p>
+      <div class="free-badge">Kostenlos</div>
     </header>
     
     <main>
@@ -62,6 +62,7 @@
                 <li>Checkliste zur Selbstoptimierung</li>
               </ul>
               <p class="package-validity">Gültig bis 16.05.2025</p>
+              <button class="package-btn btn-primary" data-package="Basic">Paket anfragen</button>
             </div>
             
             <!-- Pro-Paket -->
@@ -77,6 +78,7 @@
                 <li>Priorisierungsplan für Maßnahmen</li>
                 <li>60 Min. Strategie-Beratung</li>
               </ul>
+              <button class="package-btn btn-primary" data-package="Pro">Paket anfragen</button>
             </div>
             
             <!-- Premium-Paket -->
@@ -93,13 +95,58 @@
                 <li>GBP-Monitoring (2 Monate)</li>
                 <li>90 Min. Online-Beratung (3 x 30 Min.)</li>
               </ul>
+              <button class="package-btn btn-primary" data-package="Premium">Paket anfragen</button>
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- Paket-Anfrage-Formular (anfangs versteckt) -->
+      <section id="package-request-form" class="form-container" style="display: none;">
+        <h2>Paket-Anfrage</h2>
+        <p class="form-description">Bitte vervollständige deine Anfrage für das <span id="selected-package">Basic</span>-Paket:</p>
         
-        <div class="download-section">
-          <button id="download-pdf" class="btn btn-primary">PDF-Bericht herunterladen</button>
-        </div>
+        <form name="package-request" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <!-- Netlify-spezifische Felder -->
+          <input type="hidden" name="form-name" value="package-request" />
+          <input type="hidden" name="package-type" id="package-type" value="Basic" />
+          <p class="hidden">
+            <label>Bot-Feld (nicht ausfüllen): <input name="bot-field" /></label>
+          </p>
+          
+          <!-- Falls noch nicht vorhanden, Kontaktdaten abfragen -->
+          <div id="additional-info-fields">
+            <div class="form-group">
+              <label for="request-name">Name:</label>
+              <input type="text" id="request-name" name="name" placeholder="Dein vollständiger Name" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="request-email">E-Mail:</label>
+              <input type="email" id="request-email" name="email" placeholder="deine@email.de" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="request-phone">Telefon:</label>
+              <input type="tel" id="request-phone" name="phone" placeholder="Deine Telefonnummer" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="request-message">Nachricht (optional):</label>
+            <textarea id="request-message" name="message" rows="4" placeholder="Deine Nachricht oder Fragen zum Paket"></textarea>
+          </div>
+          
+          <div class="form-check">
+            <input type="checkbox" id="request-privacy" name="privacy" required>
+            <label for="request-privacy">Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und stimme zu.</label>
+          </div>
+          
+          <div class="form-submit">
+            <button type="submit" class="btn btn-primary">Anfrage senden</button>
+            <button type="button" class="btn btn-secondary" id="cancel-request">Zurück zu den Ergebnissen</button>
+          </div>
+        </form>
       </section>
     </main>
     
@@ -109,7 +156,6 @@
   </div>
   
   <script>
-    // Kombinierte JavaScript-Funktionalität
     document.addEventListener('DOMContentLoaded', function() {
       // Zuerst Lade-Animation anzeigen
       document.getElementById('loading-section').style.display = 'block';
@@ -162,8 +208,8 @@
         // Empfehlungen generieren
         generateRecommendations(data);
         
-        // PDF-Download-Button einrichten
-        initializePDFDownload(data);
+        // Event-Listener für Paket-Buttons hinzufügen
+        setupPackageRequestButtons(data);
       }
       
       // Funktion zum Anzeigen des Scores
@@ -258,274 +304,3 @@
         if (!container) return;
         
         // Score bestimmen
-        const auditScore = parseFloat(data['audit-score']) || getRandomScore();
-        
-        // Empfehlungen basierend auf dem Score
-        let recommendations = [];
-        
-        if (auditScore < 30) {
-          recommendations = [
-            'Dein Google Business Profil benötigt dringend Optimierung. Wir empfehlen unser Premium-Paket für eine vollständige Überarbeitung.',
-            'Beginne mit dem Hochladen hochwertiger Fotos und der Vervollständigung aller Grundinformationen.',
-            'Implementiere eine Strategie zur regelmäßigen Aktualisierung deines Profils.',
-            'Starte mit dem Sammeln von Bewertungen deiner zufriedenen Kunden.',
-            'Optimiere die NAP-Informationen (Name, Adresse, Telefonnummer) auf allen Plattformen.'
-          ];
-        } else if (auditScore < 70) {
-          recommendations = [
-            'Dein GBP hat Potential! Mit unserem Pro-Paket kannst du deine Sichtbarkeit deutlich erhöhen.',
-            'Achte auf regelmäßige Posts und Updates in deinem Profil.',
-            'Erweitere deine Bildersammlung mit professionellen Fotos.',
-            'Reagiere noch schneller auf Bewertungen, um die Kundenbindung zu stärken.',
-            'Nutze alle verfügbaren Attribute, um dein Profil vollständig zu optimieren.'
-          ];
-        } else {
-          recommendations = [
-            'Dein GBP ist bereits gut optimiert! Mit unserem Basic-Paket kannst du den Vorsprung weiter ausbauen.',
-            'Fokussiere dich auf fortgeschrittene Strategien wie lokale Veranstaltungen und spezielle Angebote.',
-            'Nutze die Analysen regelmäßig, um Trends zu erkennen und darauf zu reagieren.',
-            'Erweitere deine Dienstleistungs- und Produktbeschreibungen.',
-            'Nutze regelmäßige Performance-Berichte, um deine Strategie zu verfeinern.'
-          ];
-        }
-        
-        // HTML für die Empfehlungen erstellen
-        let recommendationsHTML = '';
-        recommendations.forEach((recommendation, index) => {
-          recommendationsHTML += `
-            <div class="recommendation-item">
-              <p><strong>${index + 1}.</strong> ${recommendation}</p>
-            </div>
-          `;
-        });
-        
-        // In das DOM einfügen
-        container.innerHTML = recommendationsHTML;
-      }
-      
-      // Funktion zum Initialisieren des PDF-Downloads
-      function initializePDFDownload(data) {
-        const downloadButton = document.getElementById('download-pdf');
-        if (downloadButton) {
-          downloadButton.addEventListener('click', function() {
-            generatePDF(data);
-          });
-        }
-      }
-      
-      // Funktion zum Generieren eines PDF-Berichts
-      function generatePDF(data) {
-        // jsPDF initialisieren
-        const { jsPDF } = window.jspdf;
-        if (!jsPDF) {
-          console.error('jsPDF wurde nicht gefunden');
-          return;
-        }
-        
-        const doc = new jsPDF();
-        
-        // Titel und Logo
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(24);
-        doc.setTextColor(30, 41, 59); // --primary-color
-        doc.text('GBP-PRO-AUDIT', 105, 20, { align: 'center' });
-        
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(16);
-        doc.setTextColor(100, 116, 139); // --text-secondary
-        doc.text('Google Business Profil Analyse', 105, 30, { align: 'center' });
-        
-        // Linie
-        doc.setDrawColor(167, 139, 250); // --accent-color
-        doc.setLineWidth(0.5);
-        doc.line(20, 35, 190, 35);
-        
-        // Datum
-        doc.setFontSize(12);
-        doc.setTextColor(30, 41, 59);
-        const today = new Date();
-        doc.text(`Erstellt am: ${today.toLocaleDateString('de-DE')}`, 20, 45);
-        
-        // Score
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(20);
-        doc.setTextColor(30, 41, 59);
-        const score = parseFloat(data['audit-score']) || getRandomScore();
-        doc.text(`Ihr GBP-Score: ${score}%`, 105, 60, { align: 'center' });
-        
-        // Kundeninformationen
-        doc.setFontSize(16);
-        doc.text('Kundeninformationen', 20, 75);
-        
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(12);
-        let yPos = 85;
-        if (data.name) {
-          doc.text(`Name: ${data.name}`, 20, yPos);
-          yPos += 8;
-        }
-        if (data.company) {
-          doc.text(`Firma: ${data.company}`, 20, yPos);
-          yPos += 8;
-        }
-        if (data.email) {
-          doc.text(`E-Mail: ${data.email}`, 20, yPos);
-          yPos += 8;
-        }
-        if (data.phone) {
-          doc.text(`Telefon: ${data.phone}`, 20, yPos);
-          yPos += 8;
-        }
-        if (data.website) {
-          doc.text(`Website: ${data.website}`, 20, yPos);
-          yPos += 8;
-        }
-        if (data['gbp-url']) {
-          doc.text(`GBP URL: ${data['gbp-url']}`, 20, yPos);
-          yPos += 8;
-        }
-        
-        // Linie
-        doc.line(20, yPos + 5, 190, yPos + 5);
-        yPos += 15;
-        
-        // Empfohlenes Paket
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(16);
-        doc.text('Unsere Empfehlung', 20, yPos);
-        yPos += 10;
-        
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(12);
-        let recommendedPackage = 'Basic';
-        if (score < 30) {
-          recommendedPackage = 'Premium';
-        } else if (score < 70) {
-          recommendedPackage = 'Pro';
-        }
-        
-        doc.text(`Basierend auf Ihrem Score empfehlen wir unser ${recommendedPackage}-Paket.`, 20, yPos);
-        yPos += 15;
-        
-        // Paketinfos
-        switch (recommendedPackage) {
-          case 'Basic':
-            doc.text('Basic-Paket (198,99€ statt 499€):', 20, yPos);
-            yPos += 8;
-            doc.text('• Vollständiger GBP-PRO-AUDIT', 25, yPos);
-            yPos += 6;
-            doc.text('• PDF-Auswertung des aktuellen Profils', 25, yPos);
-            yPos += 6;
-            doc.text('• PDF-Optimierungsplan mit konkreten Maßnahmen', 25, yPos);
-            yPos += 6;
-            doc.text('• 30 Min. Telefon-Beratung', 25, yPos);
-            yPos += 6;
-            doc.text('• Checkliste zur Selbstoptimierung', 25, yPos);
-            break;
-          case 'Pro':
-            doc.text('Pro-Paket (699€):', 20, yPos);
-            yPos += 8;
-            doc.text('• Alle Basic-Leistungen', 25, yPos);
-            yPos += 6;
-            doc.text('• Detaillierte Wettbewerbsanalyse (PDF)', 25, yPos);
-            yPos += 6;
-            doc.text('• Optimierung von 3 kritischen GBP-Faktoren', 25, yPos);
-            yPos += 6;
-            doc.text('• Erweiterte Handlungsempfehlungen', 25, yPos);
-            yPos += 6;
-            doc.text('• Priorisierungsplan für Maßnahmen', 25, yPos);
-            yPos += 6;
-            doc.text('• 60 Min. Strategie-Beratung', 25, yPos);
-            break;
-          case 'Premium':
-            doc.text('Premium-Paket (999€):', 20, yPos);
-            yPos += 8;
-            doc.text('• Alle Pro-Leistungen', 25, yPos);
-            yPos += 6;
-            doc.text('• Professionell-gestützte GBP-Komplettanalyse', 25, yPos);
-            yPos += 6;
-            doc.text('• Monatlicher Performance-Bericht (2 Monate)', 25, yPos);
-            yPos += 6;
-            doc.text('• Optimierung von 5 kritischen GBP-Faktoren', 25, yPos);
-            yPos += 6;
-            doc.text('• Bewertungsmanagement-Strategie', 25, yPos);
-            yPos += 6;
-            doc.text('• GBP-Monitoring (2 Monate)', 25, yPos);
-            yPos += 6;
-            doc.text('• 90 Min. Online-Beratung (3 x 30 Min.)', 25, yPos);
-            break;
-        }
-        
-        // Fußzeile
-        doc.setFontSize(10);
-        doc.setTextColor(100, 116, 139);
-        doc.text('Für weitere Informationen kontaktieren Sie uns unter info@pm-hannover.de', 105, 270, { align: 'center' });
-        doc.text('© 2025 PrintMedia Grafik + Druck e.K.. Alle Rechte vorbehalten.', 105, 275, { align: 'center' });
-        
-        // PDF speichern
-        const pdfName = `GBP-PRO-AUDIT_${data.name || 'Bericht'}.pdf`;
-        doc.save(pdfName);
-      }
-      
-      // Hilfsfunktionen
-      function getRandomScore() {
-        return Math.floor(Math.random() * 100);
-      }
-      
-      function generateDummyResults() {
-        const questions = [
-          "Ist dein Google Business Profil vollständig ausgefüllt?",
-          "Hast du regelmäßig neue Rezensionen (mindestens 1 pro Monat)?",
-          "Beantwortest du alle Bewertungen zeitnah (innerhalb von 24 Stunden)?",
-          "Veröffentlichst du regelmäßig Google Posts (mind. 2 pro Monat)?",
-          "Hast du mehr als 10 hochwertige Fotos in deinem Profil?",
-          "Hast du alle relevanten Attribute für dein Business eingestellt?",
-          "Ist dein Unternehmen in den richtigen Kategorien gelistet?",
-          "Nutzt du die Produkt- oder Dienstleistungs-Features in deinem Profil?",
-          "Hast du eine konsistente NAP (Name, Address, Phone) auf allen Plattformen?",
-          "Überwachst du regelmäßig die Insights/Statistiken deines GBP?"
-        ];
-        
-        const dummyResults = [];
-        for(let i = 0; i < 10; i++) {
-          const isPassed = Math.random() > 0.5;
-          dummyResults.push({
-            question: questions[i],
-            passed: isPassed,
-            explanation: isPassed ? 
-              "Super! Du machst das richtig." : 
-              "Hier besteht Optimierungsbedarf."
-          });
-        }
-        
-        return dummyResults;
-      }
-    });
-  </script>
-
-  <style>
-    /* Zusätzliche Stile für die Ladeanimation */
-    .loading-container {
-      text-align: center;
-      padding: 3rem;
-      margin: 0 auto;
-      max-width: 600px;
-    }
-    
-    .loader {
-      border: 5px solid var(--primary-light);
-      border-top: 5px solid var(--accent-color);
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1.5s linear infinite;
-      margin: 2rem auto;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
-</body>
-</html>
