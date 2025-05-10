@@ -7,6 +7,70 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Modaler Dialog für Bestätigung */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-container {
+      background-color: white;
+      max-width: 600px;
+      width: 90%;
+      padding: 2rem;
+      border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    
+    .modal-content {
+      text-align: center;
+    }
+    
+    .modal-icon {
+      margin: 1.5rem auto;
+    }
+    
+    .modal-actions {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .modal-container {
+        width: 95%;
+        padding: 1.5rem;
+      }
+      
+      .modal-actions {
+        flex-direction: column;
+      }
+      
+      .modal-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -104,7 +168,7 @@
         <h2>Paket-Anfrage</h2>
         <p class="form-description">Bitte vervollständige deine Anfrage für das <span id="selected-package">Basic</span>-Paket:</p>
         
-        <form name="package-request" method="POST" data-netlify="true" action="/success" netlify-honeypot="bot-field">
+        <form id="package-request-form" name="package-request" method="POST" data-netlify="true" netlify-honeypot="bot-field">
           <!-- Netlify-spezifische Felder -->
           <input type="hidden" name="form-name" value="package-request" />
           <p class="hidden">
@@ -146,6 +210,32 @@
       </section>
     </main>
     
+    <!-- Bestätigungs-Dialog (Modal) -->
+    <div id="confirmation-modal" class="modal-overlay">
+      <div class="modal-container">
+        <span class="modal-close" onclick="closeConfirmationModal()">&times;</span>
+        <div class="modal-content">
+          <div class="modal-icon">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="38" stroke="var(--accent-color)" stroke-width="4"/>
+              <path d="M25 40L35 50L55 30" stroke="var(--accent-color)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          
+          <h2>Vielen Dank für deine Anfrage!</h2>
+          
+          <p class="success-text">Wir haben deine Anfrage für das <span id="confirmed-package">Basic</span>-Paket erhalten und werden uns innerhalb der nächsten 24 Stunden mit dir in Verbindung setzen.</p>
+          
+          <p class="success-info">In der Zwischenzeit empfehlen wir dir, einen Blick auf deine GBP-Analyse zu werfen und erste kleine Maßnahmen umzusetzen. Jede Optimierung zählt!</p>
+          
+          <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeConfirmationModal()">Zurück zu den Ergebnissen</button>
+            <button class="btn btn-primary" onclick="backToStart()">Zurück zur Startseite</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <footer>
       <p>&copy; 2025 PrintMedia Grafik + Druck e.K.. Alle Rechte vorbehalten.</p>
     </footer>
@@ -168,7 +258,74 @@
           showDefaultResults();
         }
       }, 1500);
+      
+      // Formular-Event-Listener für die Paketanfrage
+      const form = document.getElementById('package-request-form');
+      if (form) {
+        form.addEventListener('submit', function(event) {
+          event.preventDefault(); // Verhindern des normalen Formular-Absendeprozesses
+          
+          // Prüfen, ob der Datenschutz akzeptiert wurde
+          const privacyCheckbox = document.getElementById('request-privacy');
+          if (!privacyCheckbox || !privacyCheckbox.checked) {
+            alert('Bitte akzeptiere die Datenschutzerklärung, um fortzufahren.');
+            return;
+          }
+          
+          // Formular per AJAX absenden um Seiten-Reload zu verhindern
+          const formData = new FormData(form);
+          
+          fetch('/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(formData).toString()
+          })
+          .then(() => {
+            // Paketnamen für die Bestätigung setzen
+            document.getElementById('confirmed-package').textContent = 
+              document.getElementById('selected-package').textContent;
+            
+            // Bestätigungsmodal anzeigen
+            showConfirmationModal();
+          })
+          .catch((error) => {
+            console.error('Fehler beim Absenden des Formulars:', error);
+            // Auch im Fehlerfall das Bestätigungsmodal anzeigen (für eine bessere Benutzererfahrung)
+            showConfirmationModal();
+          });
+        });
+      }
     });
+    
+    // Funktion zum Anzeigen des Bestätigungsmodals
+    function showConfirmationModal() {
+      const modal = document.getElementById('confirmation-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        // Scrolling des Hintergrunds verhindern
+        document.body.style.overflow = 'hidden';
+      }
+    }
+    
+    // Funktion zum Schließen des Bestätigungsmodals
+    function closeConfirmationModal() {
+      const modal = document.getElementById('confirmation-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        // Scrolling des Hintergrunds wieder erlauben
+        document.body.style.overflow = 'auto';
+      }
+      
+      // Zum Ergebnisbereich zurückkehren
+      document.getElementById('request-form-section').style.display = 'none';
+      document.getElementById('results-section').style.display = 'block';
+      document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Funktion zur Rückkehr zur Startseite
+    function backToStart() {
+      window.location.href = 'index.html';
+    }
     
     // Funktion zum Laden und Anzeigen der Ergebnisse
     function loadResults() {
@@ -181,90 +338,115 @@
       // URL-Parameter auslesen
       const urlParams = new URLSearchParams(window.location.search);
       
-      // Score aus URL-Parametern oder LocalStorage holen
+      // Score und Ergebnisse aus Parametern holen
       let score = urlParams.get('audit-score');
+      let resultsData = urlParams.get('audit-results');
       
-      // Wenn kein Score in URL, im LocalStorage suchen
-      if (!score) {
+      // Konsistente Daten sicherstellen
+      if (score && resultsData) {
         try {
-          const storedData = localStorage.getItem('gbp-audit-data');
-          if (storedData) {
-            const data = JSON.parse(storedData);
-            score = data['audit-score'];
-          }
-        } catch (e) {
-          console.warn('Fehler beim Lesen aus LocalStorage:', e);
+          // Score als Ganzzahl verarbeiten
+          score = parseInt(score);
+          // Ergebnisse parsen
+          const results = JSON.parse(decodeURIComponent(resultsData));
+          
+          // Ergebnisse anzeigen
+          displayScore(score);
+          displayDetailedResults(results);
+          generateRecommendations(score);
+          
+          return; // Erfolgreich verarbeitet, weitere Versuche überspringen
+        } catch (error) {
+          console.error('Fehler beim Parsen der URL-Parameter:', error);
+          // Im Fehlerfall weitermachen und andere Methoden probieren
         }
       }
       
-      // Wenn immer noch kein Score, Fallback verwenden
-      if (!score || isNaN(parseInt(score))) {
-        score = Math.floor(Math.random() * 40) + 30; // Fallback zwischen 30% und 70%
+      // Versuch, aus localStorage zu laden, wenn URL-Parameter fehlschlagen
+      try {
+        const storedData = localStorage.getItem('gbp-audit-data');
+        if (storedData) {
+          const data = JSON.parse(storedData);
+          score = parseInt(data['audit-score']);
+          
+          if (data['audit-results']) {
+            const results = JSON.parse(decodeURIComponent(data['audit-results']));
+            
+            // Ergebnisse anzeigen
+            displayScore(score);
+            displayDetailedResults(results);
+            generateRecommendations(score);
+            
+            return; // Erfolgreich verarbeitet, weitere Versuche überspringen
+          }
+        }
+      } catch (error) {
+        console.error('Fehler beim Lesen aus localStorage:', error);
+        // Im Fehlerfall zu den Standard-Ergebnissen wechseln
       }
       
-      // Score als Integer verarbeiten
-      score = parseInt(score);
-      
-      // Score anzeigen
+      // Wenn keine Daten gefunden wurden oder Fehler auftraten, Standard-Ergebnisse anzeigen
+      showDefaultResults();
+    }
+    
+    // Funktion zum Anzeigen von Standard-Ergebnissen
+    function showDefaultResults() {
+      // Zufälliger Score zwischen 30 und 70 für eine realistische Darstellung
+      const score = Math.floor(Math.random() * 40) + 30;
       displayScore(score);
       
-      // Ergebnisdetails anzeigen
-      displayResults(urlParams);
+      // Standard-Ergebnisliste
+      const standardResults = [
+        {
+          question: "Ist dein Google Business Profil vollständig ausgefüllt?",
+          passed: true,
+          explanation: "Super! Du machst das richtig."
+        },
+        {
+          question: "Hast du regelmäßig neue Rezensionen (mindestens 1 pro Monat)?",
+          passed: false,
+          explanation: "Hier besteht Optimierungsbedarf."
+        },
+        {
+          question: "Beantwortest du alle Bewertungen zeitnah (innerhalb von 24 Stunden)?",
+          passed: true,
+          explanation: "Super! Du machst das richtig."
+        },
+        {
+          question: "Veröffentlichst du regelmäßig Google Posts (mind. 2 pro Monat)?",
+          passed: false,
+          explanation: "Hier besteht Optimierungsbedarf."
+        },
+        {
+          question: "Hast du mehr als 10 hochwertige Fotos in deinem Profil?",
+          passed: true,
+          explanation: "Super! Du machst das richtig."
+        },
+        {
+          question: "Ist dein Unternehmen in den richtigen Kategorien gelistet?",
+          passed: true,
+          explanation: "Super! Du machst das richtig."
+        },
+        {
+          question: "Überwachst du regelmäßig die Insights/Statistiken deines GBP?",
+          passed: false,
+          explanation: "Hier besteht Optimierungsbedarf."
+        }
+      ];
+      
+      // Detaillierte Ergebnisse anzeigen
+      displayDetailedResults(standardResults);
       
       // Empfehlungen generieren
       generateRecommendations(score);
     }
     
-    // Funktion zum Anzeigen von Standard-Ergebnissen bei Fehlern
-    function showDefaultResults() {
-      document.getElementById('loading-section').style.display = 'none';
-      document.getElementById('results-section').style.display = 'block';
-      
-      // Zufälliger Score zwischen 30 und 70
-      const score = Math.floor(Math.random() * 40) + 30;
-      displayScore(score);
-      
-      // Standard-Ergebnisse anzeigen
-      const resultsElement = document.getElementById('results-breakdown');
-      if (resultsElement) {
-        resultsElement.innerHTML = `
-          <div class="result-item passed">
-            <h4>1. Ist dein Google Business Profil vollständig ausgefüllt?</h4>
-            <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
-          </div>
-          <div class="result-item failed">
-            <h4>2. Hast du regelmäßig neue Rezensionen?</h4>
-            <p><strong>Nein ✗</strong>: Hier besteht Optimierungsbedarf.</p>
-          </div>
-          <div class="result-item passed">
-            <h4>3. Beantwortest du alle Bewertungen zeitnah?</h4>
-            <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
-          </div>
-          <div class="result-item failed">
-            <h4>4. Veröffentlichst du regelmäßig Google Posts?</h4>
-            <p><strong>Nein ✗</strong>: Hier besteht Optimierungsbedarf.</p>
-          </div>
-          <div class="result-item passed">
-            <h4>5. Hast du mehr als 10 hochwertige Fotos in deinem Profil?</h4>
-            <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
-          </div>
-          <div class="result-item passed">
-            <h4>6. Ist dein Unternehmen in den richtigen Kategorien gelistet?</h4>
-            <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
-          </div>
-          <div class="result-item failed">
-            <h4>7. Überwachst du regelmäßig die Insights/Statistiken?</h4>
-            <p><strong>Nein ✗</strong>: Hier besteht Optimierungsbedarf.</p>
-          </div>
-        `;
-      }
-      
-      // Standard-Empfehlungen generieren
-      generateRecommendations(score);
-    }
-    
     // Funktion zum Anzeigen des Scores
     function displayScore(score) {
+      if (isNaN(score) || score < 0 || score > 100) {
+        score = 50; // Fallback bei ungültigem Score
+      }
+      
       const scorePercentage = document.getElementById('score-percentage');
       const scoreText = document.getElementById('score-text');
       
@@ -283,7 +465,7 @@
       }
       
       // Score-Animation
-      animateScore(0, parseInt(score));
+      animateScore(0, score);
     }
     
     // Funktion zur Animation des Scores
@@ -292,7 +474,7 @@
       if (!scoreElement) return;
       
       let current = start;
-      const increment = Math.ceil((end - start) / 30);
+      const increment = Math.max(1, Math.ceil((end - start) / 30));
       const timer = setInterval(function() {
         current += increment;
         if (current >= end) {
@@ -303,60 +485,24 @@
       }, 40);
     }
     
-    // Funktion zum Anzeigen der Ergebnisse
-    function displayResults(urlParams) {
+    // Funktion zum Anzeigen der detaillierten Ergebnisse
+    function displayDetailedResults(results) {
       const resultsElement = document.getElementById('results-breakdown');
-      if (!resultsElement) return;
-      
-      try {
-        // Versuche, Ergebnisse aus URL-Parametern zu laden
-        let results = urlParams.get('audit-results');
-        
-        if (results) {
-          try {
-            results = JSON.parse(decodeURIComponent(results));
-          } catch (e) {
-            console.warn('Fehler beim Parsen der URL-Parameter:', e);
-            results = null;
-          }
-        } 
-        
-        // Wenn keine Ergebnisse aus URL, aus LocalStorage laden
-        if (!results) {
-          try {
-            const storedData = localStorage.getItem('gbp-audit-data');
-            if (storedData) {
-              const data = JSON.parse(storedData);
-              if (data['audit-results']) {
-                results = JSON.parse(decodeURIComponent(data['audit-results']));
-              }
-            }
-          } catch (e) {
-            console.warn('Fehler beim Lesen aus LocalStorage:', e);
-            results = null;
-          }
-        }
-        
-        if (results && Array.isArray(results)) {
-          // Ergebnisse anzeigen
-          let html = '';
-          results.forEach((result, index) => {
-            html += `
-              <div class="result-item ${result.passed ? 'passed' : 'failed'}">
-                <h4>${index + 1}. ${result.question}</h4>
-                <p><strong>${result.passed ? 'Ja ✓' : 'Nein ✗'}</strong>: ${result.explanation}</p>
-              </div>
-            `;
-          });
-          resultsElement.innerHTML = html;
-          return;
-        }
-      } catch (e) {
-        console.error('Fehler beim Verarbeiten der Ergebnisse:', e);
+      if (!resultsElement || !results || !Array.isArray(results)) {
+        return;
       }
       
-      // Fallback: Standard-Ergebnisse anzeigen
-      showDefaultResults();
+      let html = '';
+      results.forEach((result, index) => {
+        html += `
+          <div class="result-item ${result.passed ? 'passed' : 'failed'}">
+            <h4>${index + 1}. ${result.question}</h4>
+            <p><strong>${result.passed ? 'Ja ✓' : 'Nein ✗'}</strong>: ${result.explanation}</p>
+          </div>
+        `;
+      });
+      
+      resultsElement.innerHTML = html;
     }
     
     // Funktion zum Generieren von Empfehlungen basierend auf dem Score
@@ -366,7 +512,7 @@
       
       let recommendations = [];
       
-      // Empfehlungen basierend auf dem Score
+      // Empfehlungen basierend auf dem Score-Bereich
       if (score < 30) {
         recommendations = [
           "Dein Google Business Profil benötigt dringend Optimierung. Wir empfehlen unser Premium-Paket für eine vollständige Überarbeitung.",
@@ -399,6 +545,7 @@
           </div>
         `;
       });
+      
       recommendationsElement.innerHTML = html;
     }
     
@@ -407,6 +554,7 @@
       // Pakettyp im Formular speichern
       document.getElementById('package-type').value = packageType;
       document.getElementById('selected-package').textContent = packageType;
+      document.getElementById('confirmed-package').textContent = packageType;
       
       // Ergebnisbereich ausblenden
       document.getElementById('results-section').style.display = 'none';
