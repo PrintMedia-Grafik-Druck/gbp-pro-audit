@@ -7,6 +7,70 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Modaler Dialog für Bestätigung */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-container {
+      background-color: white;
+      max-width: 600px;
+      width: 90%;
+      padding: 2rem;
+      border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    
+    .modal-content {
+      text-align: center;
+    }
+    
+    .modal-icon {
+      margin: 1.5rem auto;
+    }
+    
+    .modal-actions {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .modal-container {
+        width: 95%;
+        padding: 1.5rem;
+      }
+      
+      .modal-actions {
+        flex-direction: column;
+      }
+      
+      .modal-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -17,66 +81,31 @@
     </header>
     
     <main>
-      <section class="results-container">
+      <!-- Lade-Animation -->
+      <div id="loading-section" class="loading-container">
+        <h2>Deine Ergebnisse werden geladen...</h2>
+        <div class="loader"></div>
+      </div>
+      
+      <!-- Ergebnisbereich (anfangs versteckt) -->
+      <section id="results-section" class="results-container" style="display: none;">
         <h2>Deine GBP-PRO-AUDIT Ergebnisse</h2>
         
         <div class="score-display">
-          <div class="score-circle" style="--percentage: 60%;">
-            <span id="score-percentage">60%</span>
+          <div class="score-circle">
+            <span id="score-percentage">0%</span>
           </div>
-          <p>Dein Google Business Profil ist zu <span id="score-text">60%</span> optimiert.</p>
+          <p>Dein Google Business Profil ist zu <span id="score-text">0%</span> optimiert.</p>
         </div>
         
         <div class="results-details">
           <h3>Detaillierte Auswertung</h3>
-          <div class="results-list">
-            <div class="result-item passed">
-              <h4>1. Ist dein Google Business Profil vollständig ausgefüllt?</h4>
-              <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
-            </div>
-            <div class="result-item failed">
-              <h4>2. Hast du regelmäßig neue Rezensionen?</h4>
-              <p><strong>Nein ✗</strong>: Hier besteht Optimierungsbedarf.</p>
-            </div>
-            <div class="result-item passed">
-              <h4>3. Beantwortest du alle Bewertungen zeitnah?</h4>
-              <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
-            </div>
-            <div class="result-item failed">
-              <h4>4. Veröffentlichst du regelmäßig Google Posts?</h4>
-              <p><strong>Nein ✗</strong>: Hier besteht Optimierungsbedarf.</p>
-            </div>
-            <div class="result-item passed">
-              <h4>5. Hast du mehr als 10 hochwertige Fotos in deinem Profil?</h4>
-              <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
-            </div>
-            <div class="result-item passed">
-              <h4>6. Ist dein Unternehmen in den richtigen Kategorien gelistet?</h4>
-              <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
-            </div>
-            <div class="result-item failed">
-              <h4>7. Überwachst du regelmäßig die Insights/Statistiken?</h4>
-              <p><strong>Nein ✗</strong>: Hier besteht Optimierungsbedarf.</p>
-            </div>
-          </div>
+          <div id="results-breakdown" class="results-list"></div>
         </div>
         
         <div class="recommendations">
           <h3>Personalisierte Empfehlungen</h3>
-          <div class="recommendations-list">
-            <div class="recommendation-item">
-              <p><strong>1.</strong> Dein GBP hat Potential! Mit unserem Pro-Paket kannst du deine Sichtbarkeit deutlich erhöhen.</p>
-            </div>
-            <div class="recommendation-item">
-              <p><strong>2.</strong> Achte auf regelmäßige Posts und Updates in deinem Profil.</p>
-            </div>
-            <div class="recommendation-item">
-              <p><strong>3.</strong> Reagiere schneller auf Bewertungen, um die Kundenbindung zu stärken.</p>
-            </div>
-            <div class="recommendation-item">
-              <p><strong>4.</strong> Analysiere deine GBP-Insights regelmäßig, um deine Strategie zu optimieren.</p>
-            </div>
-          </div>
+          <div id="recommendations-list" class="recommendations-list"></div>
         </div>
         
         <div class="packages">
@@ -95,7 +124,7 @@
                 <li>Checkliste zur Selbstoptimierung</li>
               </ul>
               <p class="package-validity">Gültig bis 16.05.2025</p>
-              <a href="kontakt.html" class="package-btn btn-primary">Paket anfragen</a>
+              <button class="package-btn btn-primary" data-package="Basic" onclick="requestPackage('Basic')">Paket anfragen</button>
             </div>
             
             <!-- Pro-Paket -->
@@ -111,7 +140,7 @@
                 <li>Priorisierungsplan für Maßnahmen</li>
                 <li>60 Min. Strategie-Beratung</li>
               </ul>
-              <a href="kontakt.html" class="package-btn btn-primary">Paket anfragen</a>
+              <button class="package-btn btn-primary" data-package="Pro" onclick="requestPackage('Pro')">Paket anfragen</button>
             </div>
             
             <!-- Premium-Paket -->
@@ -128,10 +157,56 @@
                 <li>GBP-Monitoring (2 Monate)</li>
                 <li>90 Min. Online-Beratung (3 x 30 Min.)</li>
               </ul>
-              <a href="kontakt.html" class="package-btn btn-primary">Paket anfragen</a>
+              <button class="package-btn btn-primary" data-package="Premium" onclick="requestPackage('Premium')">Paket anfragen</button>
             </div>
           </div>
         </div>
+      </section>
+      
+      <!-- Anfrage-Formular (versteckt) -->
+      <section id="request-form-section" class="form-container" style="display: none;">
+        <h2>Paket-Anfrage</h2>
+        <p class="form-description">Bitte vervollständige deine Anfrage für das <span id="selected-package">Basic</span>-Paket:</p>
+        
+        <form id="package-request-form" name="package-request" method="POST" data-netlify="true" action="/success.html">
+          <!-- Netlify-spezifische Felder -->
+          <input type="hidden" name="form-name" value="package-request" />
+          <p class="hidden">
+            <label>Nicht ausfüllen: <input name="bot-field" /></label>
+          </p>
+          
+          <input type="hidden" id="package-type" name="package-type" value="Basic" />
+          
+          <div class="form-group">
+            <label for="request-name">Name:</label>
+            <input type="text" id="request-name" name="name" placeholder="Dein vollständiger Name" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="request-email">E-Mail:</label>
+            <input type="email" id="request-email" name="email" placeholder="deine@email.de" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="request-phone">Telefon:</label>
+            <input type="tel" id="request-phone" name="phone" placeholder="Deine Telefonnummer" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="request-message">Nachricht (optional):</label>
+            <textarea id="request-message" name="message" rows="4" placeholder="Deine Nachricht oder Fragen zum Paket"></textarea>
+          </div>
+          
+          <div class="form-check">
+            <input type="checkbox" id="request-privacy" name="privacy" required>
+            <label for="request-privacy">Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und stimme zu.</label>
+          </div>
+          
+          <div class="buttons-row">
+            <button type="submit" class="btn btn-primary">Anfrage senden</button>
+            <button type="button" class="btn btn-secondary" onclick="showResults()">Zurück zu den Ergebnissen</button>
+          </div>
+        </form>
       </section>
     </main>
     
@@ -139,5 +214,196 @@
       <p>&copy; 2025 PrintMedia Grafik + Druck e.K.. Alle Rechte vorbehalten.</p>
     </footer>
   </div>
+  
+  <script>
+    // Bei DOMContentLoaded-Event ausführen
+    document.addEventListener('DOMContentLoaded', function() {
+      // Erst beim Laden der Seite den Ladebildschirm zeigen
+      document.getElementById('loading-section').style.display = 'block';
+      
+      // Sofort versuchen, die Ergebnisse zu laden
+      try {
+        loadResults();
+      } catch (error) {
+        console.error('Fehler beim Laden der Ergebnisse:', error);
+        alert('Es gab ein Problem beim Laden der Ergebnisse. Bitte versuchen Sie es erneut.');
+      }
+    });
+    
+    // Funktion zum Laden und Anzeigen der Ergebnisse
+    function loadResults() {
+      console.log('Lade Ergebnisse...');
+      
+      // URL-Parameter auslesen
+      const urlParams = new URLSearchParams(window.location.search);
+      console.log('URL-Parameter:', urlParams.toString());
+      
+      // Score aus URL-Parametern oder LocalStorage holen
+      let score = urlParams.get('audit-score');
+      let resultsData = urlParams.get('audit-results');
+      
+      console.log('URL Score:', score);
+      console.log('URL Results:', resultsData);
+      
+      // Wenn keine Daten in URL, aus localStorage versuchen
+      if (!score || !resultsData) {
+        try {
+          console.log('Versuche aus localStorage zu laden...');
+          const storedData = localStorage.getItem('gbp-audit-data');
+          if (storedData) {
+            const data = JSON.parse(storedData);
+            score = data['audit-score'];
+            resultsData = data['audit-results'];
+            console.log('LocalStorage Score:', score);
+            console.log('LocalStorage Results:', resultsData);
+          }
+        } catch (e) {
+          console.error('Fehler beim Lesen aus localStorage:', e);
+        }
+      }
+      
+      // Ladebildschirm ausblenden
+      document.getElementById('loading-section').style.display = 'none';
+      
+      // Ergebnisbereich anzeigen
+      document.getElementById('results-section').style.display = 'block';
+      
+      // Prüfen ob Daten vorhanden sind
+      if (score && resultsData) {
+        try {
+          // Score anzeigen
+          displayScore(parseInt(score));
+          
+          // Ergebnisdetails anzeigen
+          const results = JSON.parse(decodeURIComponent(resultsData));
+          displayDetailedResults(results);
+          
+          // Empfehlungen generieren
+          generateRecommendations(parseInt(score));
+          
+          return; // Erfolgreich geladen
+        } catch (e) {
+          console.error('Fehler beim Verarbeiten der Daten:', e);
+        }
+      }
+      
+      console.log('Keine Daten gefunden oder Fehler beim Laden');
+      // Wenn keine Daten gefunden wurden oder Fehler auftraten, zurück zur Startseite
+      window.location.href = 'index.html';
+    }
+    
+    // Funktion zum Anzeigen des Scores
+    function displayScore(score) {
+      console.log('Zeige Score an:', score);
+      
+      const scorePercentage = document.getElementById('score-percentage');
+      const scoreText = document.getElementById('score-text');
+      
+      if (scorePercentage) {
+        scorePercentage.textContent = score + '%';
+      }
+      
+      if (scoreText) {
+        scoreText.textContent = score + '%';
+      }
+      
+      // Score-Kreis aktualisieren
+      const scoreCircle = document.querySelector('.score-circle');
+      if (scoreCircle) {
+        scoreCircle.style.setProperty('--percentage', score + '%');
+      }
+    }
+    
+    // Funktion zum Anzeigen der detaillierten Ergebnisse
+    function displayDetailedResults(results) {
+      console.log('Zeige detaillierte Ergebnisse an:', results);
+      
+      const resultsElement = document.getElementById('results-breakdown');
+      if (!resultsElement) return;
+      
+      let html = '';
+      results.forEach((result, index) => {
+        html += `
+          <div class="result-item ${result.passed ? 'passed' : 'failed'}">
+            <h4>${index + 1}. ${result.question}</h4>
+            <p><strong>${result.passed ? 'Ja ✓' : 'Nein ✗'}</strong>: ${result.explanation}</p>
+          </div>
+        `;
+      });
+      
+      resultsElement.innerHTML = html;
+    }
+    
+    // Funktion zum Generieren von Empfehlungen basierend auf dem Score
+    function generateRecommendations(score) {
+      console.log('Generiere Empfehlungen für Score:', score);
+      
+      const recommendationsElement = document.getElementById('recommendations-list');
+      if (!recommendationsElement) return;
+      
+      let recommendations = [];
+      
+      // Empfehlungen basierend auf dem Score-Bereich
+      if (score < 30) {
+        recommendations = [
+          "Dein Google Business Profil benötigt dringend Optimierung. Wir empfehlen unser Premium-Paket für eine vollständige Überarbeitung.",
+          "Beginne mit dem Hochladen hochwertiger Fotos und der Vervollständigung aller Grundinformationen.",
+          "Starte mit dem Sammeln von Bewertungen deiner zufriedenen Kunden.",
+          "Implementiere eine regelmäßige Strategie für Google Posts und Aktualisierungen."
+        ];
+      } else if (score < 70) {
+        recommendations = [
+          "Dein GBP hat Potential! Mit unserem Pro-Paket kannst du deine Sichtbarkeit deutlich erhöhen.",
+          "Achte auf regelmäßige Posts und Updates in deinem Profil.",
+          "Reagiere schneller auf Bewertungen, um die Kundenbindung zu stärken.",
+          "Analysiere deine GBP-Insights regelmäßig, um deine Strategie zu optimieren."
+        ];
+      } else {
+        recommendations = [
+          "Dein GBP ist bereits gut optimiert! Mit unserem Basic-Paket kannst du den Vorsprung weiter ausbauen.",
+          "Fokussiere dich auf fortgeschrittene Strategien wie lokale Veranstaltungen und spezielle Angebote.",
+          "Nutze die Google Business Messenger-Funktion für besseren Kundenservice.",
+          "Halte dein Profil mit regelmäßigen Updates und neuen Fotos aktuell."
+        ];
+      }
+      
+      // Empfehlungen anzeigen
+      let html = '';
+      recommendations.forEach((recommendation, index) => {
+        html += `
+          <div class="recommendation-item">
+            <p><strong>${index + 1}.</strong> ${recommendation}</p>
+          </div>
+        `;
+      });
+      
+      recommendationsElement.innerHTML = html;
+    }
+    
+    // Funktion zum Anzeigen des Anfrage-Formulars
+    function requestPackage(packageType) {
+      console.log('Paket angefragt:', packageType);
+      
+      // Pakettyp im Formular speichern
+      document.getElementById('package-type').value = packageType;
+      document.getElementById('selected-package').textContent = packageType;
+      
+      // Ergebnisbereich ausblenden
+      document.getElementById('results-section').style.display = 'none';
+      
+      // Anfrage-Formular anzeigen
+      document.getElementById('request-form-section').style.display = 'block';
+      
+      // Zum Formular scrollen
+      document.getElementById('request-form-section').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Funktion zum Zurückkehren zu den Ergebnissen
+    function showResults() {
+      document.getElementById('request-form-section').style.display = 'none';
+      document.getElementById('results-section').style.display = 'block';
+      document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
 </body>
 </html>
