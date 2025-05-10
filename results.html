@@ -104,8 +104,13 @@
         <h2>Paket-Anfrage</h2>
         <p class="form-description">Bitte vervollständige deine Anfrage für das <span id="selected-package">Basic</span>-Paket:</p>
         
-        <form name="package-request" method="POST" data-netlify="true" action="/success">
+        <form name="package-request" method="POST" data-netlify="true" action="/success" netlify-honeypot="bot-field">
+          <!-- Netlify-spezifische Felder -->
           <input type="hidden" name="form-name" value="package-request" />
+          <p class="hidden">
+            <label>Bot-Feld (nicht ausfüllen): <input name="bot-field" /></label>
+          </p>
+          
           <input type="hidden" id="package-type" name="package-type" value="Basic" />
           
           <div class="form-group">
@@ -193,9 +198,12 @@
       }
       
       // Wenn immer noch kein Score, Fallback verwenden
-      if (!score) {
-        score = Math.floor(Math.random() * 100);
+      if (!score || isNaN(parseInt(score))) {
+        score = Math.floor(Math.random() * 40) + 30; // Fallback zwischen 30% und 70%
       }
+      
+      // Score als Integer verarbeiten
+      score = parseInt(score);
       
       // Score anzeigen
       displayScore(score);
@@ -305,15 +313,27 @@
         let results = urlParams.get('audit-results');
         
         if (results) {
-          results = JSON.parse(decodeURIComponent(results));
-        } else {
-          // Versuche, aus LocalStorage zu laden
-          const storedData = localStorage.getItem('gbp-audit-data');
-          if (storedData) {
-            const data = JSON.parse(storedData);
-            if (data['audit-results']) {
-              results = JSON.parse(decodeURIComponent(data['audit-results']));
+          try {
+            results = JSON.parse(decodeURIComponent(results));
+          } catch (e) {
+            console.warn('Fehler beim Parsen der URL-Parameter:', e);
+            results = null;
+          }
+        } 
+        
+        // Wenn keine Ergebnisse aus URL, aus LocalStorage laden
+        if (!results) {
+          try {
+            const storedData = localStorage.getItem('gbp-audit-data');
+            if (storedData) {
+              const data = JSON.parse(storedData);
+              if (data['audit-results']) {
+                results = JSON.parse(decodeURIComponent(data['audit-results']));
+              }
             }
+          } catch (e) {
+            console.warn('Fehler beim Lesen aus LocalStorage:', e);
+            results = null;
           }
         }
         
@@ -336,7 +356,7 @@
       }
       
       // Fallback: Standard-Ergebnisse anzeigen
-      resultsElement.innerHTML = '<p>Keine detaillierten Ergebnisse verfügbar.</p>';
+      showDefaultResults();
     }
     
     // Funktion zum Generieren von Empfehlungen basierend auf dem Score
