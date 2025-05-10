@@ -13,27 +13,25 @@
     <header>
       <h1>GBP-PRO-AUDIT</h1>
       <p>Professionelle Analyse deines Google Business Profils</p>
-      <div class="free-badge">Kostenlos</div>
+      <div class="free-tag">Kostenlos</div>
     </header>
     
     <main>
-      <!-- Lade-Animation (wird automatisch ausgeblendet) -->
+      <!-- Lade-Animation -->
       <div id="loading-section" class="loading-container">
         <h2>Deine Ergebnisse werden geladen...</h2>
         <div class="loader"></div>
       </div>
-
-      <section id="results-container" class="results-container" style="display:none;">
-        <div class="results-header">
-          <h2>Deine GBP-PRO-AUDIT Ergebnisse</h2>
-          <p>Vielen Dank für deine Teilnahme. Hier ist deine detaillierte Analyse.</p>
-        </div>
+      
+      <!-- Ergebnisbereich (anfangs versteckt) -->
+      <section id="results-section" class="results-container" style="display: none;">
+        <h2>Deine GBP-PRO-AUDIT Ergebnisse</h2>
         
         <div class="score-display">
           <div class="score-circle">
             <span id="score-percentage">0%</span>
           </div>
-          <p>Basierend auf deinen Antworten ist dein Google Business Profil zu <span id="score-text">0%</span> optimiert.</p>
+          <p>Dein Google Business Profil ist zu <span id="score-text">0%</span> optimiert.</p>
         </div>
         
         <div class="results-details">
@@ -62,7 +60,7 @@
                 <li>Checkliste zur Selbstoptimierung</li>
               </ul>
               <p class="package-validity">Gültig bis 16.05.2025</p>
-              <button class="package-btn btn-primary" data-package="Basic">Paket anfragen</button>
+              <button class="package-btn btn-primary" data-package="Basic" onclick="requestPackage('Basic')">Paket anfragen</button>
             </div>
             
             <!-- Pro-Paket -->
@@ -78,7 +76,7 @@
                 <li>Priorisierungsplan für Maßnahmen</li>
                 <li>60 Min. Strategie-Beratung</li>
               </ul>
-              <button class="package-btn btn-primary" data-package="Pro">Paket anfragen</button>
+              <button class="package-btn btn-primary" data-package="Pro" onclick="requestPackage('Pro')">Paket anfragen</button>
             </div>
             
             <!-- Premium-Paket -->
@@ -95,41 +93,34 @@
                 <li>GBP-Monitoring (2 Monate)</li>
                 <li>90 Min. Online-Beratung (3 x 30 Min.)</li>
               </ul>
-              <button class="package-btn btn-primary" data-package="Premium">Paket anfragen</button>
+              <button class="package-btn btn-primary" data-package="Premium" onclick="requestPackage('Premium')">Paket anfragen</button>
             </div>
           </div>
         </div>
       </section>
-
-      <!-- Paket-Anfrage-Formular (anfangs versteckt) -->
-      <section id="package-request-form" class="form-container" style="display: none;">
+      
+      <!-- Anfrage-Formular (versteckt) -->
+      <section id="request-form-section" class="form-container" style="display: none;">
         <h2>Paket-Anfrage</h2>
         <p class="form-description">Bitte vervollständige deine Anfrage für das <span id="selected-package">Basic</span>-Paket:</p>
         
-        <form name="package-request" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-          <!-- Netlify-spezifische Felder -->
+        <form name="package-request" method="POST" data-netlify="true" action="/success">
           <input type="hidden" name="form-name" value="package-request" />
-          <input type="hidden" name="package-type" id="package-type" value="Basic" />
-          <p class="hidden">
-            <label>Bot-Feld (nicht ausfüllen): <input name="bot-field" /></label>
-          </p>
+          <input type="hidden" id="package-type" name="package-type" value="Basic" />
           
-          <!-- Falls noch nicht vorhanden, Kontaktdaten abfragen -->
-          <div id="additional-info-fields">
-            <div class="form-group">
-              <label for="request-name">Name:</label>
-              <input type="text" id="request-name" name="name" placeholder="Dein vollständiger Name" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="request-email">E-Mail:</label>
-              <input type="email" id="request-email" name="email" placeholder="deine@email.de" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="request-phone">Telefon:</label>
-              <input type="tel" id="request-phone" name="phone" placeholder="Deine Telefonnummer" required>
-            </div>
+          <div class="form-group">
+            <label for="request-name">Name:</label>
+            <input type="text" id="request-name" name="name" placeholder="Dein vollständiger Name" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="request-email">E-Mail:</label>
+            <input type="email" id="request-email" name="email" placeholder="deine@email.de" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="request-phone">Telefon:</label>
+            <input type="tel" id="request-phone" name="phone" placeholder="Deine Telefonnummer" required>
           </div>
           
           <div class="form-group">
@@ -142,9 +133,9 @@
             <label for="request-privacy">Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und stimme zu.</label>
           </div>
           
-          <div class="form-submit">
+          <div class="buttons-row">
             <button type="submit" class="btn btn-primary">Anfrage senden</button>
-            <button type="button" class="btn btn-secondary" id="cancel-request">Zurück zu den Ergebnissen</button>
+            <button type="button" class="btn btn-secondary" onclick="showResults()">Zurück zu den Ergebnissen</button>
           </div>
         </form>
       </section>
@@ -156,151 +147,263 @@
   </div>
   
   <script>
+    // Hauptteil der JavaScript-Funktionalität
     document.addEventListener('DOMContentLoaded', function() {
-      // Zuerst Lade-Animation anzeigen
+      // Erst beim Laden der Seite den Ladebildschirm zeigen
       document.getElementById('loading-section').style.display = 'block';
       
-      // Verzögerung, um die Ladeanzeige anzuzeigen
+      // Nach 1.5 Sekunden Ergebnisse anzeigen
       setTimeout(function() {
-        // Lade-Animation ausblenden
-        document.getElementById('loading-section').style.display = 'none';
-        // Ergebnisse anzeigen
-        document.getElementById('results-container').style.display = 'block';
-        
-        // Ergebnisse verarbeiten
-        processResults();
+        try {
+          // Ergebnisse laden und anzeigen
+          loadResults();
+        } catch (error) {
+          console.error('Fehler beim Laden der Ergebnisse:', error);
+          // Fallback: Standard-Ergebnisse anzeigen
+          showDefaultResults();
+        }
       }, 1500);
+    });
+    
+    // Funktion zum Laden und Anzeigen der Ergebnisse
+    function loadResults() {
+      // Ladebildschirm ausblenden
+      document.getElementById('loading-section').style.display = 'none';
       
-      // Funktion zur Verarbeitung der Ergebnisse
-      function processResults() {
-        // URL-Parameter auslesen
-        const params = new URLSearchParams(window.location.search);
-        
-        // Daten aus den URL-Parametern sammeln
-        const formData = {};
-        for(const [key, value] of params) {
-          formData[key] = value;
+      // Ergebnisbereich anzeigen
+      document.getElementById('results-section').style.display = 'block';
+      
+      // URL-Parameter auslesen
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Score aus URL-Parametern oder LocalStorage holen
+      let score = urlParams.get('audit-score');
+      
+      // Wenn kein Score in URL, im LocalStorage suchen
+      if (!score) {
+        try {
+          const storedData = localStorage.getItem('gbp-audit-data');
+          if (storedData) {
+            const data = JSON.parse(storedData);
+            score = data['audit-score'];
+          }
+        } catch (e) {
+          console.warn('Fehler beim Lesen aus LocalStorage:', e);
         }
+      }
+      
+      // Wenn immer noch kein Score, Fallback verwenden
+      if (!score) {
+        score = Math.floor(Math.random() * 100);
+      }
+      
+      // Score anzeigen
+      displayScore(score);
+      
+      // Ergebnisdetails anzeigen
+      displayResults(urlParams);
+      
+      // Empfehlungen generieren
+      generateRecommendations(score);
+    }
+    
+    // Funktion zum Anzeigen von Standard-Ergebnissen bei Fehlern
+    function showDefaultResults() {
+      document.getElementById('loading-section').style.display = 'none';
+      document.getElementById('results-section').style.display = 'block';
+      
+      // Zufälliger Score zwischen 30 und 70
+      const score = Math.floor(Math.random() * 40) + 30;
+      displayScore(score);
+      
+      // Standard-Ergebnisse anzeigen
+      const resultsElement = document.getElementById('results-breakdown');
+      if (resultsElement) {
+        resultsElement.innerHTML = `
+          <div class="result-item passed">
+            <h4>1. Ist dein Google Business Profil vollständig ausgefüllt?</h4>
+            <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
+          </div>
+          <div class="result-item failed">
+            <h4>2. Hast du regelmäßig neue Rezensionen?</h4>
+            <p><strong>Nein ✗</strong>: Hier besteht Optimierungsbedarf.</p>
+          </div>
+          <div class="result-item passed">
+            <h4>3. Beantwortest du alle Bewertungen zeitnah?</h4>
+            <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
+          </div>
+          <div class="result-item failed">
+            <h4>4. Veröffentlichst du regelmäßig Google Posts?</h4>
+            <p><strong>Nein ✗</strong>: Hier besteht Optimierungsbedarf.</p>
+          </div>
+          <div class="result-item passed">
+            <h4>5. Hast du mehr als 10 hochwertige Fotos in deinem Profil?</h4>
+            <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
+          </div>
+          <div class="result-item passed">
+            <h4>6. Ist dein Unternehmen in den richtigen Kategorien gelistet?</h4>
+            <p><strong>Ja ✓</strong>: Super! Du machst das richtig.</p>
+          </div>
+          <div class="result-item failed">
+            <h4>7. Überwachst du regelmäßig die Insights/Statistiken?</h4>
+            <p><strong>Nein ✗</strong>: Hier besteht Optimierungsbedarf.</p>
+          </div>
+        `;
+      }
+      
+      // Standard-Empfehlungen generieren
+      generateRecommendations(score);
+    }
+    
+    // Funktion zum Anzeigen des Scores
+    function displayScore(score) {
+      const scorePercentage = document.getElementById('score-percentage');
+      const scoreText = document.getElementById('score-text');
+      
+      if (scorePercentage) {
+        scorePercentage.textContent = score + '%';
+      }
+      
+      if (scoreText) {
+        scoreText.textContent = score + '%';
+      }
+      
+      // Score-Kreis aktualisieren
+      const scoreCircle = document.querySelector('.score-circle');
+      if (scoreCircle) {
+        scoreCircle.style.setProperty('--percentage', score + '%');
+      }
+      
+      // Score-Animation
+      animateScore(0, parseInt(score));
+    }
+    
+    // Funktion zur Animation des Scores
+    function animateScore(start, end) {
+      const scoreElement = document.getElementById('score-percentage');
+      if (!scoreElement) return;
+      
+      let current = start;
+      const increment = Math.ceil((end - start) / 30);
+      const timer = setInterval(function() {
+        current += increment;
+        if (current >= end) {
+          clearInterval(timer);
+          current = end;
+        }
+        scoreElement.textContent = current + '%';
+      }, 40);
+    }
+    
+    // Funktion zum Anzeigen der Ergebnisse
+    function displayResults(urlParams) {
+      const resultsElement = document.getElementById('results-breakdown');
+      if (!resultsElement) return;
+      
+      try {
+        // Versuche, Ergebnisse aus URL-Parametern zu laden
+        let results = urlParams.get('audit-results');
         
-        // Aus lokalem Speicher lesen (Backup)
-        function getDataFromStorage() {
-          try {
-            const storedData = localStorage.getItem('gbp-audit-data');
-            if (storedData) {
-              return JSON.parse(storedData);
+        if (results) {
+          results = JSON.parse(decodeURIComponent(results));
+        } else {
+          // Versuche, aus LocalStorage zu laden
+          const storedData = localStorage.getItem('gbp-audit-data');
+          if (storedData) {
+            const data = JSON.parse(storedData);
+            if (data['audit-results']) {
+              results = JSON.parse(decodeURIComponent(data['audit-results']));
             }
-          } catch (e) {
-            console.error('Fehler beim Lesen der gespeicherten Daten:', e);
-          }
-          return {};
-        }
-        
-        // Daten kombinieren
-        const storedData = getDataFromStorage();
-        const data = {...storedData, ...formData};
-        
-        // Score anzeigen
-        displayScore(data);
-        
-        // Ergebnisse anzeigen
-        displayResults(data);
-        
-        // Empfehlungen generieren
-        generateRecommendations(data);
-        
-        // Event-Listener für Paket-Buttons hinzufügen
-        setupPackageRequestButtons(data);
-      }
-      
-      // Funktion zum Anzeigen des Scores
-      function displayScore(data) {
-        const scoreElement = document.getElementById('score-percentage');
-        const scoreTextElement = document.getElementById('score-text');
-        
-        // Standardwert oder aus Daten
-        const score = parseFloat(data['audit-score']) || getRandomScore();
-        
-        if (scoreElement) {
-          scoreElement.textContent = `${score}%`;
-        }
-        
-        if (scoreTextElement) {
-          scoreTextElement.textContent = `${score}%`;
-        }
-        
-        // Score-Kreis anpassen
-        const scoreCircle = document.querySelector('.score-circle');
-        if (scoreCircle) {
-          scoreCircle.style.setProperty('--percentage', `${score}%`);
-        }
-        
-        // Animiere den Score
-        animateScore(0, score);
-      }
-      
-      // Funktion zur Animation des Score-Wertes
-      function animateScore(start, end) {
-        const element = document.getElementById('score-percentage');
-        if (!element) return;
-        
-        const duration = 1500; // Dauer der Animation in ms
-        const startTime = performance.now();
-        
-        function updateScore(currentTime) {
-          const elapsedTime = currentTime - startTime;
-          
-          if (elapsedTime < duration) {
-            const progress = elapsedTime / duration;
-            const currentScore = Math.floor(start + (end - start) * progress);
-            element.textContent = `${currentScore}%`;
-            requestAnimationFrame(updateScore);
-          } else {
-            element.textContent = `${end}%`;
           }
         }
         
-        requestAnimationFrame(updateScore);
+        if (results && Array.isArray(results)) {
+          // Ergebnisse anzeigen
+          let html = '';
+          results.forEach((result, index) => {
+            html += `
+              <div class="result-item ${result.passed ? 'passed' : 'failed'}">
+                <h4>${index + 1}. ${result.question}</h4>
+                <p><strong>${result.passed ? 'Ja ✓' : 'Nein ✗'}</strong>: ${result.explanation}</p>
+              </div>
+            `;
+          });
+          resultsElement.innerHTML = html;
+          return;
+        }
+      } catch (e) {
+        console.error('Fehler beim Verarbeiten der Ergebnisse:', e);
       }
       
-      // Funktion zum Anzeigen der Audit-Ergebnisse
-      function displayResults(data) {
-        const resultsElement = document.getElementById('results-breakdown');
-        if (!resultsElement) return;
-        
-        let auditResults;
-        
-        if (data['audit-results']) {
-          try {
-            // Versuche, die Ergebnisse als JSON zu parsen
-            auditResults = JSON.parse(decodeURIComponent(data['audit-results']));
-          } catch (e) {
-            console.error('Fehler beim Parsen der Audit-Ergebnisse:', e);
-          }
-        }
-        
-        if (!auditResults || !Array.isArray(auditResults)) {
-          // Fallback, wenn keine gültigen Ergebnisse vorliegen
-          auditResults = generateDummyResults();
-        }
-        
-        // HTML für die Ergebnisse erstellen
-        let resultsHTML = '';
-        auditResults.forEach((item, index) => {
-          resultsHTML += `
-            <div class="result-item ${item.passed ? 'passed' : 'failed'}">
-              <h4>${index + 1}. ${item.question || 'Unbekannte Frage'}</h4>
-              <p><strong>${item.passed ? 'Ja ✓' : 'Nein ✗'}</strong>: ${item.explanation || ''}</p>
-            </div>
-          `;
-        });
-        
-        // In das DOM einfügen
-        resultsElement.innerHTML = resultsHTML;
+      // Fallback: Standard-Ergebnisse anzeigen
+      resultsElement.innerHTML = '<p>Keine detaillierten Ergebnisse verfügbar.</p>';
+    }
+    
+    // Funktion zum Generieren von Empfehlungen basierend auf dem Score
+    function generateRecommendations(score) {
+      const recommendationsElement = document.getElementById('recommendations-list');
+      if (!recommendationsElement) return;
+      
+      let recommendations = [];
+      
+      // Empfehlungen basierend auf dem Score
+      if (score < 30) {
+        recommendations = [
+          "Dein Google Business Profil benötigt dringend Optimierung. Wir empfehlen unser Premium-Paket für eine vollständige Überarbeitung.",
+          "Beginne mit dem Hochladen hochwertiger Fotos und der Vervollständigung aller Grundinformationen.",
+          "Starte mit dem Sammeln von Bewertungen deiner zufriedenen Kunden.",
+          "Implementiere eine regelmäßige Strategie für Google Posts und Aktualisierungen."
+        ];
+      } else if (score < 70) {
+        recommendations = [
+          "Dein GBP hat Potential! Mit unserem Pro-Paket kannst du deine Sichtbarkeit deutlich erhöhen.",
+          "Achte auf regelmäßige Posts und Updates in deinem Profil.",
+          "Reagiere schneller auf Bewertungen, um die Kundenbindung zu stärken.",
+          "Analysiere deine GBP-Insights regelmäßig, um deine Strategie zu optimieren."
+        ];
+      } else {
+        recommendations = [
+          "Dein GBP ist bereits gut optimiert! Mit unserem Basic-Paket kannst du den Vorsprung weiter ausbauen.",
+          "Fokussiere dich auf fortgeschrittene Strategien wie lokale Veranstaltungen und spezielle Angebote.",
+          "Nutze die Google Business Messenger-Funktion für besseren Kundenservice.",
+          "Halte dein Profil mit regelmäßigen Updates und neuen Fotos aktuell."
+        ];
       }
       
-      // Funktion zum Generieren personalisierter Empfehlungen
-      function generateRecommendations(data) {
-        const container = document.getElementById('recommendations-list');
-        if (!container) return;
-        
-        // Score bestimmen
+      // Empfehlungen anzeigen
+      let html = '';
+      recommendations.forEach((recommendation, index) => {
+        html += `
+          <div class="recommendation-item">
+            <p><strong>${index + 1}.</strong> ${recommendation}</p>
+          </div>
+        `;
+      });
+      recommendationsElement.innerHTML = html;
+    }
+    
+    // Funktion zum Anzeigen des Anfrage-Formulars
+    function requestPackage(packageType) {
+      // Pakettyp im Formular speichern
+      document.getElementById('package-type').value = packageType;
+      document.getElementById('selected-package').textContent = packageType;
+      
+      // Ergebnisbereich ausblenden
+      document.getElementById('results-section').style.display = 'none';
+      
+      // Anfrage-Formular anzeigen
+      document.getElementById('request-form-section').style.display = 'block';
+      
+      // Zum Formular scrollen
+      document.getElementById('request-form-section').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Funktion zum Zurückkehren zu den Ergebnissen
+    function showResults() {
+      document.getElementById('request-form-section').style.display = 'none';
+      document.getElementById('results-section').style.display = 'block';
+      document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
