@@ -203,7 +203,7 @@
           </div>
           
           <div class="buttons-row">
-            <button type="submit" class="btn btn-primary">Anfrage senden</button>
+            <button type="button" class="btn btn-primary" onclick="submitPackageRequest()">Anfrage senden</button>
             <button type="button" class="btn btn-secondary" onclick="showResults()">Zurück zu den Ergebnissen</button>
           </div>
         </form>
@@ -258,44 +258,47 @@
           showDefaultResults();
         }
       }, 1500);
-      
-      // Formular-Event-Listener für die Paketanfrage
-      const form = document.getElementById('package-request-form');
-      if (form) {
-        form.addEventListener('submit', function(event) {
-          event.preventDefault(); // Verhindern des normalen Formular-Absendeprozesses
-          
-          // Prüfen, ob der Datenschutz akzeptiert wurde
-          const privacyCheckbox = document.getElementById('request-privacy');
-          if (!privacyCheckbox || !privacyCheckbox.checked) {
-            alert('Bitte akzeptiere die Datenschutzerklärung, um fortzufahren.');
-            return;
-          }
-          
-          // Formular per AJAX absenden um Seiten-Reload zu verhindern
-          const formData = new FormData(form);
-          
-          fetch('/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams(formData).toString()
-          })
-          .then(() => {
-            // Paketnamen für die Bestätigung setzen
-            document.getElementById('confirmed-package').textContent = 
-              document.getElementById('selected-package').textContent;
-            
-            // Bestätigungsmodal anzeigen
-            showConfirmationModal();
-          })
-          .catch((error) => {
-            console.error('Fehler beim Absenden des Formulars:', error);
-            // Auch im Fehlerfall das Bestätigungsmodal anzeigen (für eine bessere Benutzererfahrung)
-            showConfirmationModal();
-          });
-        });
-      }
     });
+    
+    // WICHTIGER FIX: Eigene Formular-Absende-Funktion, die nicht die Standardaktion des Formulars verwendet
+    function submitPackageRequest() {
+      const form = document.getElementById('package-request-form');
+      
+      // Prüfen, ob der Datenschutz akzeptiert wurde
+      const privacyCheckbox = document.getElementById('request-privacy');
+      if (!privacyCheckbox || !privacyCheckbox.checked) {
+        alert('Bitte akzeptiere die Datenschutzerklärung, um fortzufahren.');
+        return;
+      }
+      
+      // Formular-Validierung
+      if (!form.checkValidity()) {
+        // Manuelle Anzeige der Validierungsmeldungen
+        form.reportValidity();
+        return;
+      }
+      
+      // Paketnamen für die Bestätigung setzen
+      document.getElementById('confirmed-package').textContent = 
+        document.getElementById('selected-package').textContent;
+      
+      // Formular per AJAX absenden ohne Seiten-Reload
+      const formData = new FormData(form);
+      
+      fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData).toString()
+      })
+      .then(() => {
+        console.log('Formular erfolgreich gesendet');
+        showConfirmationModal(); // Modal-Dialog anzeigen
+      })
+      .catch((error) => {
+        console.error('Fehler beim Absenden des Formulars:', error);
+        showConfirmationModal(); // Auch im Fehlerfall das Modal anzeigen
+      });
+    }
     
     // Funktion zum Anzeigen des Bestätigungsmodals
     function showConfirmationModal() {
