@@ -56,6 +56,43 @@
       gap: 1rem;
     }
     
+    .success-icon svg {
+      width: 80px;
+      height: 80px;
+    }
+    
+    .success-text {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    
+    .success-info {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+    
+    .success-details {
+      background-color: var(--accent-light);
+      padding: 1.5rem;
+      border-radius: 4px;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+    
+    .success-details h3 {
+      font-family: var(--font-main);
+      margin-bottom: 1rem;
+    }
+    
+    .success-details ol {
+      padding-left: 1.5rem;
+    }
+    
+    .success-details li {
+      margin-bottom: 0.75rem;
+    }
+    
     @media (max-width: 768px) {
       .modal-container {
         width: 95%;
@@ -168,7 +205,7 @@
         <h2>Paket-Anfrage</h2>
         <p class="form-description">Bitte vervollständige deine Anfrage für das <span id="selected-package">Basic</span>-Paket:</p>
         
-        <form id="package-request-form" name="package-request" method="POST" data-netlify="true" action="/success.html">
+        <form id="package-request-form" name="package-request" method="POST" data-netlify="true">
           <!-- Netlify-spezifische Felder -->
           <input type="hidden" name="form-name" value="package-request" />
           <p class="hidden">
@@ -203,12 +240,48 @@
           </div>
           
           <div class="buttons-row">
-            <button type="submit" class="btn btn-primary">Anfrage senden</button>
+            <button type="button" class="btn btn-primary" onclick="submitForm()">Anfrage senden</button>
             <button type="button" class="btn btn-secondary" onclick="showResults()">Zurück zu den Ergebnissen</button>
           </div>
         </form>
       </section>
     </main>
+    
+    <!-- Bestätigungs-Dialog (Modal) -->
+    <div id="confirmation-modal" class="modal-overlay">
+      <div class="modal-container">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <div class="modal-content">
+          <div class="success-icon">
+            <svg viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="38" stroke="var(--accent-color)" stroke-width="4"/>
+              <path d="M25 40L35 50L55 30" stroke="var(--accent-color)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          
+          <h2>Vielen Dank für deine Anfrage!</h2>
+          
+          <p class="success-text">Wir haben deine Anfrage für das <span id="confirmed-package">Basic</span>-Paket erhalten und werden uns innerhalb der nächsten 24 Stunden mit dir in Verbindung setzen.</p>
+          
+          <p class="success-info">In der Zwischenzeit empfehlen wir dir, einen Blick auf deine GBP-Analyse zu werfen und erste kleine Maßnahmen umzusetzen. Jede Optimierung zählt!</p>
+          
+          <div class="success-details">
+            <h3>Die nächsten Schritte</h3>
+            <ol>
+              <li>Unser Experten-Team prüft deine Anfrage und bereitet eine individuelle Beratung vor</li>
+              <li>Du erhältst eine E-Mail-Bestätigung mit weiteren Informationen</li>
+              <li>Wir kontaktieren dich telefonisch zur Terminvereinbarung</li>
+              <li>Gemeinsam starten wir die Optimierung deines Google Business Profils!</li>
+            </ol>
+          </div>
+          
+          <div class="modal-actions">
+            <button class="btn btn-primary" onclick="closeModal()">Zurück zu den Ergebnissen</button>
+            <button class="btn btn-secondary" onclick="backToStart()">Zurück zur Startseite</button>
+          </div>
+        </div>
+      </div>
+    </div>
     
     <footer>
       <p>&copy; 2025 PrintMedia Grafik + Druck e.K.. Alle Rechte vorbehalten.</p>
@@ -227,6 +300,11 @@
       } catch (error) {
         console.error('Fehler beim Laden der Ergebnisse:', error);
         alert('Es gab ein Problem beim Laden der Ergebnisse. Bitte versuchen Sie es erneut.');
+      }
+      
+      // Prüfen ob wir von einer erfolgreichen Formularübermittlung kommen
+      if (window.location.search.includes('success=true')) {
+        showModal();
       }
     });
     
@@ -387,6 +465,7 @@
       // Pakettyp im Formular speichern
       document.getElementById('package-type').value = packageType;
       document.getElementById('selected-package').textContent = packageType;
+      document.getElementById('confirmed-package').textContent = packageType;
       
       // Ergebnisbereich ausblenden
       document.getElementById('results-section').style.display = 'none';
@@ -403,6 +482,72 @@
       document.getElementById('request-form-section').style.display = 'none';
       document.getElementById('results-section').style.display = 'block';
       document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Funktion zum Absenden des Formulars
+    function submitForm() {
+      // Formular validieren
+      const form = document.getElementById('package-request-form');
+      
+      // Prüfen, ob der Datenschutz akzeptiert wurde
+      const privacyCheckbox = document.getElementById('request-privacy');
+      if (!privacyCheckbox || !privacyCheckbox.checked) {
+        alert('Bitte akzeptiere die Datenschutzerklärung, um fortzufahren.');
+        return;
+      }
+      
+      // Formular auf Vollständigkeit prüfen
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      // Formular per AJAX absenden
+      const formData = new FormData(form);
+      
+      fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData).toString()
+      })
+      .then(response => {
+        console.log('Formular erfolgreich gesendet:', response);
+        // Modal anzeigen
+        showModal();
+      })
+      .catch(error => {
+        console.error('Fehler beim Senden des Formulars:', error);
+        // Auch bei Fehler das Modal anzeigen (für bessere Benutzererfahrung)
+        showModal();
+      });
+    }
+    
+    // Funktion zum Anzeigen des Modals
+    function showModal() {
+      const modal = document.getElementById('confirmation-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Verhindert Scrollen im Hintergrund
+      }
+    }
+    
+    // Funktion zum Schließen des Modals
+    function closeModal() {
+      const modal = document.getElementById('confirmation-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Scrollen wieder erlauben
+      }
+      
+      // Zurück zu den Ergebnissen
+      document.getElementById('request-form-section').style.display = 'none';
+      document.getElementById('results-section').style.display = 'block';
+      document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Funktion zur Rückkehr zur Startseite
+    function backToStart() {
+      window.location.href = 'index.html';
     }
   </script>
 </body>
