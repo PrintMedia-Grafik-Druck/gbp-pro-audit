@@ -13,13 +13,14 @@
     <header>
       <h1>GBP-PRO-AUDIT</h1>
       <p>Die professionelle Analyse deines Google Business Profils</p>
+      <div class="free-badge">Kostenlos</div>
     </header>
 
     <main>
       <!-- 1. FRAGEN-BEREICH -->
       <section id="audit-section" class="audit-container">
         <h2>GBP-PRO-AUDIT Test</h2>
-        <p class="audit-description">Beantworte die folgenden 10 Fragen, um die Qualität deines Google Business Profils zu bewerten.</p>
+        <p class="audit-description">Beantworte die folgenden 7 Fragen, um die Qualität deines Google Business Profils zu bewerten.</p>
         
         <div id="question-container">
           <!-- Frage 1 -->
@@ -74,8 +75,8 @@
           
           <!-- Frage 6 -->
           <div class="question" id="question-6" style="display: none;">
-            <h3>Frage 6: Hast du alle relevanten Attribute für dein Business eingestellt?</h3>
-            <p>Dazu gehören Barrierefreiheit, Zahlungsmethoden, Parkmöglichkeiten, etc.</p>
+            <h3>Frage 6: Ist dein Unternehmen in den richtigen Kategorien gelistet?</h3>
+            <p>Die Hauptkategorie und alle relevanten Nebenkategorien sollten ausgewählt sein.</p>
             <div class="options">
               <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
               <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
@@ -84,37 +85,7 @@
           
           <!-- Frage 7 -->
           <div class="question" id="question-7" style="display: none;">
-            <h3>Frage 7: Ist dein Unternehmen in den richtigen Kategorien gelistet?</h3>
-            <p>Die Hauptkategorie und alle relevanten Nebenkategorien sollten ausgewählt sein.</p>
-            <div class="options">
-              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
-              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
-            </div>
-          </div>
-          
-          <!-- Frage 8 -->
-          <div class="question" id="question-8" style="display: none;">
-            <h3>Frage 8: Nutzt du die Produkt- oder Dienstleistungs-Features in deinem Profil?</h3>
-            <p>Diese Features helfen, deine Angebote besser zu präsentieren.</p>
-            <div class="options">
-              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
-              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
-            </div>
-          </div>
-          
-          <!-- Frage 9 -->
-          <div class="question" id="question-9" style="display: none;">
-            <h3>Frage 9: Hast du eine konsistente NAP (Name, Address, Phone) auf allen Plattformen?</h3>
-            <p>Deine Geschäftsinformationen sollten auf allen Plattformen identisch sein.</p>
-            <div class="options">
-              <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
-              <button type="button" class="option-btn" data-value="no" onclick="answerQuestion('no')">Nein</button>
-            </div>
-          </div>
-          
-          <!-- Frage 10 -->
-          <div class="question" id="question-10" style="display: none;">
-            <h3>Frage 10: Überwachst du regelmäßig die Insights/Statistiken deines GBP?</h3>
+            <h3>Frage 7: Überwachst du regelmäßig die Insights/Statistiken deines GBP?</h3>
             <p>Die Analyse der Performance-Daten hilft dir, deine Strategie zu optimieren.</p>
             <div class="options">
               <button type="button" class="option-btn" data-value="yes" onclick="answerQuestion('yes')">Ja</button>
@@ -126,10 +97,10 @@
         <!-- Fortschrittsanzeige -->
         <div class="progress-container">
           <div class="progress-bar">
-            <div class="progress" id="progress-bar" style="width: 10%;"></div>
+            <div class="progress" id="progress-bar" style="width: 14%;"></div>
           </div>
           <div class="progress-text">
-            <span id="current-question">1</span> von <span id="total-questions">10</span> Fragen
+            <span id="current-question">1</span> von <span id="total-questions">7</span> Fragen
           </div>
         </div>
       </section>
@@ -139,7 +110,6 @@
         <h2>Fast geschafft!</h2>
         <p class="form-description">Um deine ausführliche GBP-Analyse und personalisierte Empfehlungen zu erhalten, benötigen wir noch einige Informationen von dir:</p>
         
-        <!-- NEUE LÖSUNG: Mit action=/success und Netlify.toml Redirect -->
         <form name="gbp-audit" method="POST" data-netlify="true" action="/success" netlify-honeypot="bot-field">
           <!-- Netlify-spezifische Felder -->
           <input type="hidden" name="form-name" value="gbp-audit" />
@@ -199,20 +169,6 @@
           </div>
         </form>
       </section>
-
-      <!-- 3. SCORE-BEREICH (anfangs versteckt) -->
-      <section id="score-preview-section" class="score-preview-container" style="display: none;">
-        <h2>Dein GBP-Audit Ergebnis</h2>
-        <div class="score-preview">
-          <div class="score-circle">
-            <span id="score-percentage">0%</span>
-          </div>
-          <div class="score-message">
-            <p>Dein Google Business Profil ist zu <span id="score-text">0%</span> optimiert.</p>
-            <p class="score-hint">Fülle das Formular aus, um detaillierte Empfehlungen zu erhalten.</p>
-          </div>
-        </div>
-      </section>
     </main>
 
     <footer>
@@ -224,7 +180,7 @@
   <script>
     // Globale Variablen
     let currentQuestion = 1;
-    const totalQuestions = 10;
+    const totalQuestions = 7; // Auf 7 Fragen reduziert
     const answers = [];
 
     // Funktion wird aufgerufen, wenn der Benutzer auf eine Antwortoption klickt
@@ -272,11 +228,6 @@
       // Verstecke den Fragebereich
       document.getElementById('audit-section').style.display = 'none';
       
-      // Verstecke die Vorschau des Scores (wird erst nach dem Formular gezeigt)
-      if (document.getElementById('score-preview-section')) {
-        document.getElementById('score-preview-section').style.display = 'none';
-      }
-      
       // Zeige das Formular
       document.getElementById('form-section').style.display = 'block';
       
@@ -296,10 +247,7 @@
         "Beantwortest du alle Bewertungen zeitnah (innerhalb von 24 Stunden)?",
         "Veröffentlichst du regelmäßig Google Posts (mind. 2 pro Monat)?",
         "Hast du mehr als 10 hochwertige Fotos in deinem Profil?",
-        "Hast du alle relevanten Attribute für dein Business eingestellt?",
         "Ist dein Unternehmen in den richtigen Kategorien gelistet?",
-        "Nutzt du die Produkt- oder Dienstleistungs-Features in deinem Profil?",
-        "Hast du eine konsistente NAP (Name, Address, Phone) auf allen Plattformen?",
         "Überwachst du regelmäßig die Insights/Statistiken deines GBP?"
       ];
       
