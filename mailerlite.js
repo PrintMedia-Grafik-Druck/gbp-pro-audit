@@ -1,12 +1,14 @@
-// MailerLite API Integration
-function sendToMailerLite(userData) {
-    // MailerLite API Endpunkt
-    const url = 'https://connect.mailerlite.com/api/subscribers';
+// Neue Funktion für MailerLite API Integration 
+function tryMailerLiteAPI(userData) {
+    console.log("MailerLite API: Versuche Integration");
     
-    // Dein API-Schlüssel
+    // API-Endpunkt
+    const mailerliteUrl = 'https://connect.mailerlite.com/api/subscribers';
+    
+    // API-Schlüssel für MailerLite
     const apiKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0IiwianRpIjoiNjkzYTM4NTc4ZWJmOTY1NGY2OTBiNDVmMjExNzViNWMwZTdlODIzZWZmZWFiZDQ2NmNjN2E3ZGNmYjljNDkzNmJkMDc1YzdhOGFiZTEwMGYiLCJpYXQiOjE3NDY2OTUxMTMuOTA0OTM2LCJuYmYiOjE3NDY2OTUxMTMuOTA0OTM5LCJleHAiOjQ5MDIzNjg3MTMuODk5NDI2LCJzdWIiOiIxNDIwODkxIiwic2NvcGVzIjpbXX0.Zdgdv64UEYxXTnSjUGj6DLwlQL_v7OmZFNsykcXvOiObU889tnwoRATc_TrtxGMTPSHOFaqEu_M_A3mUyaF4tQtpEQr6S_s-v9Bv4RcpbQtLt5bUBfXd6mtLdgoZRbtyQDYQOLQ1jUaggl1PDEaTujnAcAah5AtfQuJ-tRNIKuyEpX6LOK04Lb52Ua1i4h2lxckPNX-iLQR28sZ3Eg4bWW3A78Cx9Y29jYtnNbxpdMn28IFXRkSwfeWh3Jxwf1Zyq-GKl-jGXOQTEPD9futBvoaiiT4Ct9k4FC6pcgSPn0qAII2Q3Ct7jioy1rr1dJkgB30PV1rdyLiCf8M9ksMG__Ubc_GBO69fNfEEE75n_yGLn0pwfxEUZGyrYAiLPZzt1GhJv7I3-6rJlKsODKNBpvqex05IGwjuxsAEGpxViTAEnbHemWoxcQYwAvAUE06uKvgRGoiG9hmCn9k8Kz7mdDNPmT6UrBU3J8YgjjJOYJodxohmlcFvdhzuSUqMz2tosXCZqDfPyVtDRnRTBDW4NddwHlpx0PS29P5IRRU8x79yvLyYy8C79LNtUfVg1l1x4dLSdugc4N2Et9Rb339WcsUTSSGDx2KWBxFJe2nFx09viED9o_Gr9TrCqFW8yw-KrHWPwo-xYSADxaOfXyej-i1vNEQdvY1kLi8m2JWNoQA";
     
-    // Deine Gruppen-ID
+    // Gruppen-ID für MailerLite
     const groupIds = ["153798590884480855"];
     
     // Daten für die API-Anfrage vorbereiten
@@ -21,11 +23,32 @@ function sendToMailerLite(userData) {
         groups: groupIds
     };
     
-    console.log("MailerLite: Versuche Kontakt zu erstellen", data);
-    
-    // Browser-CORS-Problem umgehen mit formbasierten Ansatz
-    // Da direkter API-Zugriff via fetch im Browser oft durch CORS blockiert wird,
-    // senden wir die Daten direkt an die E-Mail-Adresse für den Support
+    // Versuche direkten API-Aufruf ohne Hinzufügen weiterer Logik
+    try {
+        fetch(mailerliteUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log("MailerLite API: Erfolgreiche Antwort", result);
+        })
+        .catch(error => {
+            console.log("MailerLite API: CORS-Fehler (erwartet)", error);
+        });
+    } catch (error) {
+        console.log("MailerLite API: Fehler beim Versuch", error);
+    }
+}
+
+// MailerLite API Integration
+function sendToMailerLite(userData) {
+    // Versuche die direkte API-Integration zusätzlich
+    tryMailerLiteAPI(userData);
     
     // E-Mail mit Abonnenten-Details per mailto öffnen
     const emailTo = "angebot@pm-hannover.de";
