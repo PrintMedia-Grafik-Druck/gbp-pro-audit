@@ -103,6 +103,27 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error("MailerLite API Fehler bei der Anfrage:", error);
+                
+                // Zweiten CORS-Proxy als Fallback versuchen
+                const backupCorsProxy = "https://api.allorigins.win/raw?url=";
+                const backupProxyUrl = backupCorsProxy + encodeURIComponent(mailerliteUrl);
+                console.log("Versuche Backup-Proxy:", backupProxyUrl);
+                
+                fetch(backupProxyUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    console.log("MailerLite API (Backup) Erfolgreiche Antwort:", result);
+                })
+                .catch(backupError => {
+                    console.error("MailerLite API (Backup) Fehler:", backupError);
+                });
             });
         } catch (error) {
             console.error("MailerLite API Genereller Fehler:", error);
