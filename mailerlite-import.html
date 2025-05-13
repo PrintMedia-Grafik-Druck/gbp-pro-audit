@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MailerLite Kontakt-Import</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    h1 { color: #0066cc; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+    button { background: #0066cc; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
+    .result { margin-top: 20px; padding: 15px; border-radius: 4px; }
+    .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .hidden { display: none; }
+    textarea { height: 100px; }
+  </style>
+</head>
+<body>
+  <h1>MailerLite Kontakt-Import</h1>
+  <p>Mit diesem Tool können Sie manuell Kontakte zu MailerLite hinzufügen.</p>
+  
+  <div class="form-group">
+    <label for="email">E-Mail-Adresse*:</label>
+    <input type="email" id="email" required placeholder="beispiel@domain.de">
+  </div>
+  
+  <div class="form-group">
+    <label for="name">Name:</label>
+    <input type="text" id="name" placeholder="Vorname Nachname">
+  </div>
+  
+  <div class="form-group">
+    <label for="company">Firma:</label>
+    <input type="text" id="company" placeholder="Firmenname">
+  </div>
+  
+  <div class="form-group">
+    <label for="phone">Telefon:</label>
+    <input type="text" id="phone" placeholder="Telefonnummer">
+  </div>
+  
+  <div class="form-group">
+    <label for="website">Website:</label>
+    <input type="text" id="website" placeholder="https://www.example.com">
+  </div>
+  
+  <button id="sendButton" onclick="sendToMailerLite()">Zu MailerLite hinzufügen</button>
+  
+  <div id="result" class="result hidden"></div>
+  
+  <script>
+    function sendToMailerLite() {
+      // UI-Elemente
+      const email = document.getElementById('email').value;
+      const name = document.getElementById('name').value;
+      const company = document.getElementById('company').value;
+      const phone = document.getElementById('phone').value;
+      const website = document.getElementById('website').value;
+      const resultDiv = document.getElementById('result');
+      const sendButton = document.getElementById('sendButton');
+      
+      // Validierung
+      if (!email) {
+        showResult('Bitte geben Sie eine E-Mail-Adresse ein.', 'error');
+        return;
+      }
+      
+      // Button-Zustand ändern
+      sendButton.disabled = true;
+      sendButton.textContent = 'Wird gesendet...';
+      
+      // MailerLite API-Details
+      const apiKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0IiwianRpIjoiNjkzYTM4NTc4ZWJmOTY1NGY2OTBiNDVmMjExNzViNWMwZTdlODIzZWZmZWFiZDQ2NmNjN2E3ZGNmYjljNDkzNmJkMDc1YzdhOGFiZTEwMGYiLCJpYXQiOjE3NDY2OTUxMTMuOTA0OTM2LCJuYmYiOjE3NDY2OTUxMTMuOTA0OTM5LCJleHAiOjQ5MDIzNjg3MTMuODk5NDI2LCJzdWIiOiIxNDIwODkxIiwic2NvcGVzIjpbXX0.Zdgdv64UEYxXTnSjUGj6DLwlQL_v7OmZFNsykcXvOiObU889tnwoRATc_TrtxGMTPSHOFaqEu_M_A3mUyaF4tQtpEQr6S_s-v9Bv4RcpbQtLt5bUBfXd6mtLdgoZRbtyQDYQOLQ1jUaggl1PDEaTujnAcAah5AtfQuJ-tRNIKuyEpX6LOK04Lb52Ua1i4h2lxckPNX-iLQR28sZ3Eg4bWW3A78Cx9Y29jYtnNbxpdMn28IFXRkSwfeWh3Jxwf1Zyq-GKl-jGXOQTEPD9futBvoaiiT4Ct9k4FC6pcgSPn0qAII2Q3Ct7jioy1rr1dJkgB30PV1rdyLiCf8M9ksMG__Ubc_GBO69fNfEEE75n_yGLn0pwfxEUZGyrYAiLPZzt1GhJv7I3-6rJlKsODKNBpvqex05IGwjuxsAEGpxViTAEnbHemWoxcQYwAvAUE06uKvgRGoiG9hmCn9k8Kz7mdDNPmT6UrBU3J8YgjjJOYJodxohmlcFvdhzuSUqMz2tosXCZqDfPyVtDRnRTBDW4NddwHlpx0PS29P5IRRU8x79yvLyYy8C79LNtUfVg1l1x4dLSdugc4N2Et9Rb339WcsUTSSGDx2KWBxFJe2nFx09viED9o_Gr9TrCqFW8yw-KrHWPwo-xYSADxaOfXyej-i1vNEQdvY1kLi8m2JWNoQA";
+      const groupIds = ["153798590884480855"];
+      const mailerliteUrl = 'https://connect.mailerlite.com/api/subscribers';
+      
+      // CORS-Proxy verwenden
+      const corsProxy = 'https://corsproxy.io/?';
+      const proxyUrl = corsProxy + encodeURIComponent(mailerliteUrl);
+      
+      // Daten für den API-Request vorbereiten
+      const data = {
+        email: email,
+        fields: {
+          name: name,
+          company: company,
+          phone: phone,
+          website: website
+        },
+        groups: groupIds
+      };
+      
+      // API-Anfrage mit Fetch
+      fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        // Button zurücksetzen
+        sendButton.disabled = false;
+        sendButton.textContent = 'Zu MailerLite hinzufügen';
+        
+        // Antwort verarbeiten
+        if (response.ok) {
+          return response.json().then(data => {
+            showResult('Kontakt wurde erfolgreich zu MailerLite hinzugefügt!', 'success');
+            clearForm();
+          });
+        } else {
+          return response.json().then(error => {
+            throw new Error(JSON.stringify(error));
+          });
+        }
+      })
+      .catch(error => {
+        // Button zurücksetzen
+        sendButton.disabled = false;
+        sendButton.textContent = 'Zu MailerLite hinzufügen';
+        
+        // Fehler anzeigen
+        showResult('Fehler beim Hinzufügen des Kontakts: ' + error.message, 'error');
+        
+        // Fallback: E-Mail-Client öffnen
+        openEmailFallback(email, name, company, phone, website);
+      });
+    }
+    
+    // Hilfsfunktionen
+    function showResult(message, type) {
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = message;
+      resultDiv.className = `result ${type}`;
+      resultDiv.classList.remove('hidden');
+    }
+    
+    function clearForm() {
+      document.getElementById('email').value = '';
+      document.getElementById('name').value = '';
+      document.getElementById('company').value = '';
+      document.getElementById('phone').value = '';
+      document.getElementById('website').value = '';
+    }
+    
+    function openEmailFallback(email, name, company, phone, website) {
+      const emailTo = "angebot@pm-hannover.de";
+      const subject = "Neuer Newsletter-Abonnent von GBP-PRO-AUDIT";
+      let body = `Neuer Newsletter-Abonnent:\n\n`;
+      body += `Name: ${name}\n`;
+      body += `E-Mail: ${email}\n`;
+      body += `Unternehmen: ${company || "Nicht angegeben"}\n`;
+      body += `Telefon: ${phone || "Nicht angegeben"}\n`;
+      body += `Website: ${website || "Nicht angegeben"}\n\n`;
+      body += `Bitte füge diesen Kontakt zur "Google Business Optimierung"-Gruppe in MailerLite hinzu.`;
+      
+      const mailtoLink = `mailto:${emailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      
+      if (confirm('Möchten Sie die E-Mail-Fallback-Methode verwenden?')) {
+        window.open(mailtoLink);
+      }
+    }
+  </script>
+</body>
+</html>
