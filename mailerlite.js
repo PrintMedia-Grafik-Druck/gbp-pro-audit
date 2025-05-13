@@ -1,9 +1,14 @@
 // MailerLite API Integration
 function sendToMailerLite(userData) {
     console.log("MailerLite: Versuche Kontakt zu erstellen", userData);
-
-    // CORS-Proxy verwenden, um CORS-Probleme zu umgehen
-    const corsProxy = 'https://corsproxy.io/?';
+    
+    // Alternative CORS-Proxies (für Failover)
+    const corsProxies = [
+        'https://api.allorigins.win/raw?url=',
+        'https://corsproxy.io/?',
+        'https://cors-anywhere.herokuapp.com/'
+    ];
+    
     const mailerliteUrl = 'https://connect.mailerlite.com/api/subscribers';
     
     // API-Schlüssel für MailerLite
@@ -24,33 +29,78 @@ function sendToMailerLite(userData) {
         groups: groupIds
     };
     
-    // Versuchen, die API-Anfrage über den Proxy zu senden
-    fetch(corsProxy + encodeURIComponent(mailerliteUrl), {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("MailerLite API Antwort:", data);
-        
-        // Prüfen, ob die API-Anfrage erfolgreich war
-        if (data.data && data.data.id) {
-            console.log("MailerLite: Kontakt erfolgreich hinzugefügt", data);
-        } else {
-            console.warn("MailerLite: Möglicher Fehler bei der API-Anfrage", data);
-            // Bei API-Fehlern die E-Mail-Fallback-Methode verwenden
+    // Versucht, die verschiedenen Proxies nacheinander zu verwenden
+    function tryWithProxy(proxyIndex) {
+        if (proxyIndex >= corsProxies.length) {
+            console.error("MailerLite: Alle Proxy-Versuche fehlgeschlagen");
             sendMailerLiteFallback(userData);
+            return;
         }
-    })
-    .catch(error => {
-        console.error("MailerLite: Netzwerkfehler bei der API-Anfrage", error);
-        // Bei Netzwerkfehlern die E-Mail-Fallback-Methode verwenden
-        sendMailerLiteFallback(userData);
-    });
+        
+        const proxy = corsProxies[proxyIndex];
+        const proxiedUrl = proxy + encodeURIComponent(mailerliteUrl);
+        
+        console.log(`MailerLite: Versuche mit Proxy ${proxyIndex + 1}/${corsProxies.length}`);
+        
+        fetch(proxiedUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                'Origin': window.location.origin
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(result => {
+            console.log("MailerLite API Antwort:", result);
+            
+            if (result.data && result.data.id) {
+                console.log("MailerLite: Kontakt erfolgreich hinzugefügt", result);
+            } else {
+                console.warn("MailerLite: Unerwartete API-Antwort", result);
+                // Versuche nächsten Proxy
+                tryWithProxy(proxyIndex + 1);
+            }
+        })
+        .catch(error => {
+            console.error(`MailerLite: Fehler mit Proxy ${proxyIndex + 1}:`, error);
+            // Versuche nächsten Proxy
+            tryWithProxy(proxyIndex + 1);
+        });
+    }
+    
+    // Direkten API-Aufruf versuchen ohne Proxy (könnte in einigen Umgebungen funktionieren)
+    try {
+        fetch(mailerliteUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log("MailerLite: Direkter API-Aufruf erfolgreich:", result);
+        })
+        .catch(error => {
+            console.log("MailerLite: Direkter API-Aufruf fehlgeschlagen (CORS), versuche Proxies:", error);
+            tryWithProxy(0);
+        });
+    } catch (error) {
+        console.log("MailerLite: Fehler beim direkten API-Aufruf:", error);
+        tryWithProxy(0);
+    }
+    
+    // Dabei noch immer Mail senden für zusätzliche Sicherheit
+    // So ist sichergestellt, dass die Daten auf jeden Fall ankommen
+    sendMailerLiteFallback(userData);
     
     // Originale E-Mail-Fallback-Funktion
     function sendMailerLiteFallback(userData) {
